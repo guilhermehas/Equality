@@ -8,6 +8,7 @@ open import Cubical.Data.Equality
 open import Agda.Primitive
 
 open import leibniz
+open import equalities
 open Leibniz
 
 liftIso' : ∀ {a b} {B : Type b} → Iso {b} {a ⊔ b} B B
@@ -27,4 +28,4 @@ module FinalEquality (A : Set) where
   ≐≡≡' = let lifted = liftIso ≐≅≡  in isoToPath lifted
 
   ≐≡≡ : _≐_ ≡c _≡p_
-  ≐≡≡ i a b = ≐≡≡' {a} {b} i
+  ≐≡≡ = removeVars≡ ≐≡≡'
