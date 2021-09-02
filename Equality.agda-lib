@@ -1,0 +1,3 @@
+name: Equality
+depend: cubical-0.3
+include: .
