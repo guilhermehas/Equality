@@ -2,13 +2,27 @@
 
 module equalities where
 
+open import Cubical.Foundations.Prelude
+open import Agda.Primitive
 open import Cubical.Data.Equality
 
-module _ {ℓ ℓ₁} {A : Set ℓ} where
+≣-Type = λ {ℓ} → {A : Set ℓ} → A → A → Set ℓ
 
-  ≡-Type = ∀ (x y : A) → Set ℓ₁
+module _ {ℓ} where
+  record IsEquality (≣ : ≣-Type {ℓ}) : Set (ℓ-suc ℓ)  where
+    constructor eq
+    field
+      ≣-≡-≡ : {A : Set ℓ} → (≣ {A}) ≡ _≡_
 
-  removeVars≡ : {_≡₁_ : ≡-Type} {_≡₂_ : ≡-Type}
-    → (≡≡≡ : ∀ {x y : A} → (x ≡₁ y) ≡c (x ≡₂ y))
-    → _≡₁_ ≡c _≡₂_
-  removeVars≡ ≡≡≡ i a b = ≡≡≡ {a} {b} i
+  record Equality : Set (ℓ-suc ℓ) where
+    field
+      _≣_ : ≣-Type {ℓ}
+      isEquality : IsEquality _≡_
+
+  instance
+    ≡-IsEquality : IsEquality _≡_
+    ≡-IsEquality = eq refl
+
+  instance
+    ≡p-IsEquality : IsEquality _≡p_
+    ≡p-IsEquality = eq (sym λ i x y → p-c {_} {_} {x} {y} i)
