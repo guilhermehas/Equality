@@ -11,11 +11,9 @@ open import leibniz
 open import equalities
 open Leibniz
 
-liftIso' : ∀ {a b} {B : Type b} → Iso {b} {a ⊔ b} B B
-liftIso' = iso (λ x → x) (λ y → y) (λ x i → x) (λ y i → y)
-
-liftIso : ∀ {a b} {A : Type a} {B : Type b} → Iso {a ⊔ b} {b} A B → Iso {a ⊔ b} {a ⊔ b} A B
-liftIso {a} f = compIso f (liftIso' {a})
+liftIso : ∀ {a b} {A : Type a} {B : Type b} → Iso {a} {b} A B → Iso {a ⊔ b} {a ⊔ b} A B
+liftIso {a} f = iso fun inv (λ x i → rightInv x i) (λ x i → leftInv x i)
+  where open Iso f
 
 
 module FinalEquality (A : Set) where
