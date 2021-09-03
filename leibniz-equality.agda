@@ -27,9 +27,8 @@ module FinalEquality {A : Set} where
   ≐≡≡ : _≐_ {A} ≡c _≡p_
   ≐≡≡ i x y = ≐≡≡' {x} {y} i
 
-open FinalEquality
-open IsEquality
+  open IsEquality
 
-instance
-  ≐-IsEquality : IsEquality _≐_
-  ≐-IsEquality = eq (≐≡≡ ∙ ≡p-IsEquality .≣-≡-≡)
+  instance
+    ≐-IsEquality : IsEquality {_} {A} _≐_
+    ≐-IsEquality = eq (≐≡≡ ∙ ≡p-IsEquality .≣-≡-≡)
