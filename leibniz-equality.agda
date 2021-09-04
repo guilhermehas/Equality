@@ -30,5 +30,5 @@ module FinalEquality {A : Set} where
   open IsEquality
 
   instance
-    ≐-IsEquality : IsEquality {_} {A} _≐_
+    ≐-IsEquality : IsEquality {A = A} _≐_
     ≐-IsEquality = eq (≐≡≡ ∙ ≡p-IsEquality .≣-≡-≡)
