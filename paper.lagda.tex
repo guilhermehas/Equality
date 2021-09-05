@@ -1,0 +1,199 @@
+\documentclass{llncs}
+\usepackage{hyperref}
+\bibliographystyle{splncs04}
+%\usepackage{ucs}
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{txfonts}
+%\usepackage{bbm}
+%\usepackage[greek,english]{babel}
+
+% agda.sty wants to use the deprecated utf8x option, which
+% many publishers don't like. So we do it ourselves
+
+\usepackage{agda}
+
+\usepackage{proof}
+
+% this stuff is related to the Agda latex backend with inputenc/utf8
+% not having heard of many charactersrs...
+
+\usepackage{newunicodechar}
+\newunicodechar{∋}{$\ni$}
+\newunicodechar{·}{$\cdot$}
+\newunicodechar{⊢}{$\vdash$}
+\newunicodechar{⋆}{${}^\star$}
+\newunicodechar{Π}{$\Pi$}
+\newunicodechar{⇒}{$\Rightarrow$}
+\newunicodechar{ƛ}{$\lambdabar$}
+\newunicodechar{∅}{$\emptyset$}
+\newunicodechar{∀}{$\forall$}
+\newunicodechar{ϕ}{$\Phi$}
+\newunicodechar{ψ}{$\Psi$}
+\newunicodechar{ρ}{$\rho$}
+\newunicodechar{α}{$\alpha$}
+\newunicodechar{β}{$\beta$}
+\newunicodechar{μ}{$\mu$}
+\newunicodechar{σ}{$\sigma$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{Γ}{$\Gamma$}
+\newunicodechar{∥}{$\parallel$}
+\newunicodechar{Λ}{$\Lambda$}
+\newunicodechar{₂}{$~_2$}
+\newunicodechar{θ}{$\theta$}
+\newunicodechar{Θ}{$\Theta$}
+\newunicodechar{∘}{$\circ$}
+\newunicodechar{Δ}{$\Delta$}
+\newunicodechar{λ}{$\lambda$}
+\newunicodechar{⊧}{$\models$}
+\newunicodechar{⊎}{$\uplus$}
+\newunicodechar{η}{$\eta$}
+\newunicodechar{⊥}{$\bot$}
+\newunicodechar{Σ}{$\Sigma$}
+\newunicodechar{ξ}{$\xi$}
+\newunicodechar{₁}{$1$}
+\newunicodechar{ℕ}{$\mathbb{N}$}
+\newunicodechar{ᶜ}{${}^c$}
+\newunicodechar{Φ}{$\Phi$}
+\newunicodechar{Ψ}{$\Psi$}
+\newunicodechar{⊤}{$\top$}
+
+\newunicodechar{×}{$\times$}
+\newunicodechar{ℓ}{\ensuremath{\mathnormal{\ell}}}
+\newunicodechar{∣}{\ensuremath{\mathnormal{\|}}}
+\newunicodechar{∥}{\ensuremath{\mathnormal{\||}}}
+\newunicodechar{₀}{\ensuremath{{}_0}}
+\newunicodechar{₁}{\ensuremath{{}_1}}
+\newunicodechar{ℚ}{\ensuremath{\mathnormal{\mathbb{Q}}}}
+\newunicodechar{ℤ}{\ensuremath{\mathnormal{\mathbb{Z}}}}
+\newunicodechar{∷}{\ensuremath{::}}
+
+
+\usepackage{hyperref}
+\usepackage{cleveref}
+
+\author{Guilherme Horta Alvares da Silva}
+\email{guilhermehas@hotmail.com}
+\title{Making all equalities equal}
+
+\begin{document}
+
+\AgdaHide{
+\begin{code}
+{-# OPTIONS --cubical --type-in-type #-}
+
+module paper where
+
+-- open import Cubical.Foundations.Prelude
+-- open import Cubical.Foundations.Isomorphism
+-- open import Cubical.Foundations.Equiv
+-- open import Cubical.Foundations.Univalence
+-- open import Agda.Primitive
+-- open import Cubical.Data.Equality
+--
+open import Agda.Primitive.Cubical
+\end{code}
+}
+
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+
+\section{Propositional Equality}
+
+In the begin of Agda and in most theorems proves, the equality is given by Martin-Löf's definition:
+
+\begin{code}
+module Martin-Löf {ℓ} {A : Set ℓ} where
+
+  data _≡_ (x : A) : A → Set ℓ where
+    refl : x ≡ x
+\end{code}
+
+This equality is very covenient in proof assistances like Agda, because it is possible to pattern match using them:
+
+\begin{code}
+  private variable
+    x y z : A
+
+  sym  : x ≡ y → y ≡ x
+  sym refl = refl
+
+  trans : x ≡ y → y ≡ z → x ≡ z
+  trans refl refl = refl
+\end{code}
+
+But the problem of this equality is that it does not handle extensionality and other axioms very well.
+
+\begin{code}
+module FunExt {ℓ ℓ'} {A : Set ℓ} {B : Set ℓ'} where
+  open Martin-Löf
+
+  funExt-Type = {f g : A → B}
+    → ((x : A) → f x ≡ g x) → f ≡ g
+\end{code}
+
+\section{Cubical Equality}
+
+To solve this problem, Agda adopted cubical type theory that equality is a function from path to types:
+
+\begin{code}
+module CubicalEquality {ℓ} {A : Set ℓ} where
+  postulate
+    PathP : (A : I → Set ℓ) → A i0 → A i1 → Set ℓ
+
+  _≡_ : A → A → Set ℓ
+  _≡_ = PathP λ _ → A
+\end{code}
+
+From this equality, I will define reflection, symmetry and extensionality:
+
+\begin{code}
+module CubicalResults {ℓ ℓ'} {A : Set ℓ} {B : Set ℓ'} where
+  open import Cubical.Core.Primitives
+
+  private variable
+    x y z : A
+
+  refl : x ≡ x
+  refl {x = x} = λ _ → x
+
+  sym : x ≡ y → y ≡ x
+  sym p i = p (~ i)
+
+  funExt : {f g : A → B}
+    → ((x : A) → f x ≡ g x) → f ≡ g
+  funExt p i x = p x i
+\end{code}
+
+The operator \AgdaBound{~_} revert the interval. If the interval \AgdaBound{i} goes from
+\AgdaBound{i0} to \AgdaBound{i1}, the interval \AgdaBound{~ i} goes from \AgdaBound{i1} to \AgdaBound{i0}.
+
+\section{Leibniz equality}
+
+Leibniz equality is defined in this way:
+If \AgdaBound{a} is equal to \AgdaBound{b}, then for every propositional \AgdaBound{P}, if \AgdaBound{P a},
+then \AgdaBound{P b}.
+The main idea is that if both values are equal, then they are seen equal for every angle.
+
+\begin{code}
+module Leibniz {ℓ} {ℓ'} {A : Set ℓ} where
+  _≐_ : (a b : A) → Set
+  a ≐ b = (P : A → Set ℓ') → P a → P b
+\end{code}
+
+
+%\subsection{}
+
+
+
+\section*{Acknowledgements}
+
+
+\bibliography{bibliography}
+\end{document}
