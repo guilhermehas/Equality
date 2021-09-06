@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --type-in-type #-}
+{-# OPTIONS --cubical --cumulativity #-}
 
 module leibniz-equality where
 
@@ -28,7 +28,8 @@ module FinalEquality {A : Set} where
   ≐≡≡ i x y = ≐≡≡' {x} {y} i
 
   open IsEquality
+  open equalities
 
   instance
     ≐-IsEquality : IsEquality {A = A} _≐_
-    ≐-IsEquality = eq (≐≡≡ ∙ ≡p-IsEquality .≣-≡-≡)
+    ≐-IsEquality = eq λ {x} {y} → ≐≡≡' ∙ λ i → ≡p-IsEquality {ℓ-zero} .≣-≡-≡ {x} {y} i

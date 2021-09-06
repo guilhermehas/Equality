@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --type-in-type #-}
+{-# OPTIONS --cubical --cumulativity #-}
 
 module equalities where
 
@@ -12,13 +12,19 @@ open import Cubical.Data.Equality
 module _ {a ℓ} {A : Set a} where
   ≣-Type = A → A → Set ℓ
 
-  record IsEquality (≣ : ≣-Type) : Set (ℓ-suc (a ⊔ ℓ)) where
+  record IsEquality (_≣_ : ≣-Type) : Set (ℓ-suc (a ⊔ ℓ)) where
     constructor eq
     field
-      ≣-≡-≡ : let ≣' : A → A → Set (a ⊔ ℓ)
-                  ≣' = ≣
-               in ≣' ≡ _≡_
+      ≣-≡-≡ : ∀ {x y} → let
+        ℓ₁ = a ⊔ ℓ
 
+        x≡y : Type ℓ₁
+        x≡y = x ≡ y
+
+        x≣y : Type ℓ₁
+        x≣y = x ≣ y
+
+        in _≡_ {ℓ-suc ℓ₁} x≣y x≡y
 
   record Equality : Set (ℓ-suc (a ⊔ ℓ)) where
     field
@@ -32,12 +38,15 @@ module _ {a} {A : Set a} where
 
   instance
     ≡p-IsEquality : IsEquality {A = A} _≡p_
-    ≡p-IsEquality = eq (sym λ i x y → p-c {_} {_} {x} {y} i)
+    ≡p-IsEquality = eq (λ {x y} → sym λ i → p-c {x = x} {y = y} i)
+
 
 module _ {ℓ} where
+  univalencePath' : {A B : Type ℓ} → (A ≡ B) ≡ (A ≃ B)
+  univalencePath' {A} {B} =
+    ua {ℓ-suc ℓ} {A ≡ B} {A ≃ B} (compEquiv (univalence {ℓ} {A} {B})
+    (isoToEquiv (iso {ℓ} {ℓ-suc ℓ} (λ x → x) (λ x → x) (λ b i → b) λ a i → a)))
+
   instance
-    ≃-IsEquality : IsEquality {A = Type ℓ} (λ A B → Lift (A ≃ B))
-    ≃-IsEquality = eq (sym α)
-      where
-      α : _≡c_ ≡c (λ A B → Lift (A ≃ B))
-      α i A B = univalencePath {ℓ} {A} {B} i
+    ≃-IsEquality : IsEquality {A = Type ℓ} (λ A B → (A ≃ B))
+    ≃-IsEquality = eq λ {A B} → sym λ i → let w = univalencePath' {A = A} {B = B} i in w

@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --type-in-type #-}
+{-# OPTIONS --cubical --cumulativity #-}
 
 open import leibniz public
 open import equalities public
