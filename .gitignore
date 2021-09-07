@@ -1,2 +1,9 @@
 *.agdai
 .auctex-auto
+*.log
+*.sty
+*.ptb
+*.aux
+*.out
+*.pdf
+result

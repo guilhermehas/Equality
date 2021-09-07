@@ -7,6 +7,11 @@
     flake-utils.lib.eachDefaultSystem (system:
     let pkgs = import nixpkgs { inherit system; };
         agda-p = pkgs.agda.withPackages (p: with p; [ cubical ]);
+        latex= with pkgs; texlive.combine {
+          inherit (texlive)
+            scheme-full
+          ;
+        };
         name = "Equality";
     in rec {
       packages.${name} = with pkgs;
@@ -15,6 +20,7 @@
             src = ./.;
             buildInputs = [
               agda-p
+              latex
             ];
           };
       defaultPackage = packages.${name};

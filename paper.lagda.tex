@@ -1,4 +1,4 @@
-\documentclass{llncs}
+\documentclass{article}
 \usepackage{hyperref}
 \bibliographystyle{splncs04}
 %\usepackage{ucs}
@@ -21,7 +21,7 @@
 
 \usepackage{newunicodechar}
 \newunicodechar{∋}{$\ni$}
-\newunicodechar{·}{$\cdot$}
+% \newunicodechar{·}{$\cdot$}
 \newunicodechar{⊢}{$\vdash$}
 \newunicodechar{⋆}{${}^\star$}
 \newunicodechar{Π}{$\Pi$}
@@ -58,23 +58,25 @@
 \newunicodechar{Φ}{$\Phi$}
 \newunicodechar{Ψ}{$\Psi$}
 \newunicodechar{⊤}{$\top$}
+\newunicodechar{≐}{$\doteq$}
 
-\newunicodechar{×}{$\times$}
+% \newunicodechar{×}{$\times$}
 \newunicodechar{ℓ}{\ensuremath{\mathnormal{\ell}}}
 \newunicodechar{∣}{\ensuremath{\mathnormal{\|}}}
-\newunicodechar{∥}{\ensuremath{\mathnormal{\||}}}
+% \newunicodechar{∥}{\ensuremath{\mathnormal{\||}}}
 \newunicodechar{₀}{\ensuremath{{}_0}}
-\newunicodechar{₁}{\ensuremath{{}_1}}
+% \newunicodechar{₁}{\ensuremath{{}_1}}
 \newunicodechar{ℚ}{\ensuremath{\mathnormal{\mathbb{Q}}}}
 \newunicodechar{ℤ}{\ensuremath{\mathnormal{\mathbb{Z}}}}
 \newunicodechar{∷}{\ensuremath{::}}
+
 
 
 \usepackage{hyperref}
 \usepackage{cleveref}
 
 \author{Guilherme Horta Alvares da Silva}
-\email{guilhermehas@hotmail.com}
+% \email{guilhermehas@hotmail.com}
 \title{Making all equalities equal}
 
 \begin{document}
@@ -171,8 +173,8 @@ module CubicalResults {ℓ ℓ'} {A : Set ℓ} {B : Set ℓ'} where
   funExt p i x = p x i
 \end{code}
 
-The operator \AgdaBound{~_} revert the interval. If the interval \AgdaBound{i} goes from
-\AgdaBound{i0} to \AgdaBound{i1}, the interval \AgdaBound{~ i} goes from \AgdaBound{i1} to \AgdaBound{i0}.
+The operator TODO-invert revert the interval. If the interval \AgdaBound{i} goes from
+\AgdaBound{i0} to \AgdaBound{i1}, the interval TODO-invert-i goes from \AgdaBound{i1} to \AgdaBound{i0}.
 
 \section{Leibniz equality}
 
