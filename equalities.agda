@@ -6,17 +6,16 @@ open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Univalence
-open import Agda.Primitive
 open import Cubical.Data.Equality
 
 module _ {a ℓ} {A : Set a} where
   ≣-Type = A → A → Set ℓ
 
-  record IsEquality (_≣_ : ≣-Type) : Set (ℓ-suc (a ⊔ ℓ)) where
+  record IsEquality (_≣_ : ≣-Type) : Set (ℓ-suc (ℓ-max a ℓ)) where
     constructor eq
     field
       ≣-≡-≡ : ∀ {x y} → let
-        ℓ₁ = a ⊔ ℓ
+        ℓ₁ = ℓ-max a ℓ
 
         x≡y : Type ℓ₁
         x≡y = x ≡ y
@@ -26,7 +25,7 @@ module _ {a ℓ} {A : Set a} where
 
         in _≡_ {ℓ-suc ℓ₁} x≣y x≡y
 
-  record Equality : Set (ℓ-suc (a ⊔ ℓ)) where
+  record Equality : Set (ℓ-suc (ℓ-max a ℓ)) where
     field
       _≣_ : ≣-Type
       isEquality : IsEquality _≣_
@@ -49,4 +48,4 @@ module _ {ℓ} where
 
   instance
     ≃-IsEquality : IsEquality {A = Type ℓ} (λ A B → (A ≃ B))
-    ≃-IsEquality = eq λ {A B} → sym λ i → let w = univalencePath' {A = A} {B = B} i in w
+    ≃-IsEquality = eq λ {A B} → sym λ i → univalencePath' {A = A} {B = B} i

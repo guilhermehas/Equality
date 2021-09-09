@@ -5,13 +5,12 @@ module leibniz-equality where
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Function
 open import Cubical.Data.Equality
-open import Agda.Primitive
 
 open import equalities
 open import leibniz
 open Leibniz
 
-liftIso : ∀ {a b} {A : Type a} {B : Type b} → Iso {a} {b} A B → Iso {a ⊔ b} {a ⊔ b} A B
+liftIso : ∀ {a b} {A : Type a} {B : Type b} → Iso {a} {b} A B → Iso {ℓ-max a b} {ℓ-max a b} A B
 liftIso {a} f = iso fun inv (λ x i → rightInv x i) (λ x i → leftInv x i)
   where open Iso f
 
