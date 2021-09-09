@@ -109,7 +109,7 @@ In the next sections, they will be defined.
 
 \subsection{Martin-Löf Equality}
 
-In the begin of Agda and in most theorems proves, the equality is given by Martin-Löf's definition:
+At the begin of Agda and in most theorems proves, equality is given by Martin-Löf's definition:
 
 \begin{code}
 module Martin-Löf {ℓ} {A : Set ℓ} where
@@ -118,7 +118,7 @@ module Martin-Löf {ℓ} {A : Set ℓ} where
     refl : x ≡ x
 \end{code}
 
-This equality is very covenient in proof assistances like Agda, because it is possible to pattern match using them:
+This equality is very convenient in proof assistances like Agda because it is possible to pattern match using them:
 
 \begin{code}
   private variable
@@ -143,7 +143,7 @@ module FunExt {ℓ ℓ'} {A : Set ℓ} {B : Set ℓ'} where
 
 \subsection{Cubical Equality}
 
-To solve this problem, Agda adopted cubical type theory that equality is a function from path to types:
+To solve this problem, Agda adopted cubical type theory that equality is a function from the path to type:
 
 \begin{code}
 module CubicalEquality {ℓ} {A : Set ℓ} where
@@ -193,8 +193,8 @@ module LeibnizEquality {ℓ} {ℓ'} {A : Set ℓ} where
 \section{Joining all equalities}
 
 All equalities have something in common. They are all equal to each other.
-So it will be defined a common record that all equalities should have.
-In the next defintion, all equalities are equal to the cubical equality:
+So it will be defined as a common record that all equalities should have.
+In the next definition, all equalities are equal to cubical equality:
 
 \begin{code}
 
