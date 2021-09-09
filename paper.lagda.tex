@@ -40,6 +40,8 @@
 \newunicodechar{Γ}{$\Gamma$}
 \newunicodechar{∥}{$\parallel$}
 \newunicodechar{Λ}{$\Lambda$}
+\newunicodechar{₁}{$~_0$}
+\newunicodechar{₁}{$~_1$}
 \newunicodechar{₂}{$~_2$}
 \newunicodechar{θ}{$\theta$}
 \newunicodechar{Θ}{$\Theta$}
@@ -52,22 +54,23 @@
 \newunicodechar{⊥}{$\bot$}
 \newunicodechar{Σ}{$\Sigma$}
 \newunicodechar{ξ}{$\xi$}
-\newunicodechar{₁}{$1$}
 \newunicodechar{ℕ}{$\mathbb{N}$}
 \newunicodechar{ᶜ}{${}^c$}
 \newunicodechar{Φ}{$\Phi$}
 \newunicodechar{Ψ}{$\Psi$}
 \newunicodechar{⊤}{$\top$}
 \newunicodechar{≐}{$\doteq$}
+\newunicodechar{≣}{$\triangleq$}
+\newunicodechar{≃}{$\simeq$}
+\newunicodechar{≅}{$\cong$}
+\newunicodechar{∙}{$\bullet$}
+\newunicodechar{ℓ}{$\ell$}
+\newunicodechar{ℚ}{$\Q$}
+\newunicodechar{ℤ}{$\Z$}
+% \newunicodechar{}{$$}
 
-% \newunicodechar{×}{$\times$}
-\newunicodechar{ℓ}{\ensuremath{\mathnormal{\ell}}}
+
 \newunicodechar{∣}{\ensuremath{\mathnormal{\|}}}
-% \newunicodechar{∥}{\ensuremath{\mathnormal{\||}}}
-\newunicodechar{₀}{\ensuremath{{}_0}}
-% \newunicodechar{₁}{\ensuremath{{}_1}}
-\newunicodechar{ℚ}{\ensuremath{\mathnormal{\mathbb{Q}}}}
-\newunicodechar{ℤ}{\ensuremath{\mathnormal{\mathbb{Z}}}}
 \newunicodechar{∷}{\ensuremath{::}}
 
 
@@ -87,13 +90,6 @@
 
 module paper where
 
--- open import Cubical.Foundations.Prelude
--- open import Cubical.Foundations.Isomorphism
--- open import Cubical.Foundations.Equiv
--- open import Cubical.Foundations.Univalence
--- open import Agda.Primitive
--- open import Cubical.Data.Equality
---
 open import Agda.Primitive.Cubical
 \end{code}
 }
@@ -106,7 +102,12 @@ open import Agda.Primitive.Cubical
 \end{abstract}
 
 
-\section{Propositional Equality}
+\section{Equalities}
+
+There are multiple ways of defining equalities in a theorem prover.
+In the next sections, they will be defined.
+
+\subsection{Martin-Löf Equality}
 
 In the begin of Agda and in most theorems proves, the equality is given by Martin-Löf's definition:
 
@@ -140,7 +141,7 @@ module FunExt {ℓ ℓ'} {A : Set ℓ} {B : Set ℓ'} where
     → ((x : A) → f x ≡ g x) → f ≡ g
 \end{code}
 
-\section{Cubical Equality}
+\subsection{Cubical Equality}
 
 To solve this problem, Agda adopted cubical type theory that equality is a function from path to types:
 
@@ -176,7 +177,7 @@ module CubicalResults {ℓ ℓ'} {A : Set ℓ} {B : Set ℓ'} where
 The operator TODO-invert revert the interval. If the interval \AgdaBound{i} goes from
 \AgdaBound{i0} to \AgdaBound{i1}, the interval TODO-invert-i goes from \AgdaBound{i1} to \AgdaBound{i0}.
 
-\section{Leibniz equality}
+\subsection{Leibniz equality}
 
 Leibniz equality is defined in this way:
 If \AgdaBound{a} is equal to \AgdaBound{b}, then for every propositional \AgdaBound{P}, if \AgdaBound{P a},
@@ -184,13 +185,97 @@ then \AgdaBound{P b}.
 The main idea is that if both values are equal, then they are seen equal for every angle.
 
 \begin{code}
-module Leibniz {ℓ} {ℓ'} {A : Set ℓ} where
-  _≐_ : (a b : A) → Set
+module LeibnizEquality {ℓ} {ℓ'} {A : Set ℓ} where
+  _≐_ : A → A → Set
   a ≐ b = (P : A → Set ℓ') → P a → P b
 \end{code}
 
+\section{Joining all equalities}
 
-%\subsection{}
+All equalities have something in common. They are all equal to each other.
+So it will be defined a common record that all equalities should have.
+In the next defintion, all equalities are equal to the cubical equality:
+
+\begin{code}
+
+open import Cubical.Foundations.Prelude
+open import Cubical.Foundations.Isomorphism
+open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.Univalence
+open import Cubical.Foundations.Function
+open import Cubical.Data.Equality
+
+module _ {a ℓ} {A : Set a} where
+  ≣-Type = A → A → Set ℓ
+
+  record IsEquality (_≣_ : ≣-Type) : Set (ℓ-suc (ℓ-max a ℓ)) where
+    constructor eq
+    field
+      ≣-≡-≡ : ∀ {x y} → let
+        ℓ₁ = ℓ-max a ℓ
+
+        x≡y : Type ℓ₁
+        x≡y = x ≡ y
+
+        x≣y : Type ℓ₁
+        x≣y = x ≣ y
+
+        in _≡_ {ℓ-suc ℓ₁} x≣y x≡y
+
+  record Equality : Set (ℓ-suc (ℓ-max a ℓ)) where
+    field
+      _≣_ : ≣-Type
+      isEquality : IsEquality _≣_
+\end{code}
+
+It will be defined for each equality, its instance:
+
+\begin{code}
+module _ {a} {A : Set a} where
+  instance
+    ≡-IsEquality : IsEquality {A = A} _≡_
+    ≡-IsEquality = eq refl
+
+  instance
+    ≡p-IsEquality : IsEquality {A = A} _≡p_
+    ≡p-IsEquality = eq (λ {x y} → sym λ i → p-c {x = x} {y = y} i)
+
+
+module _ {ℓ} where
+  univalencePath' : {A B : Type ℓ} → (A ≡ B) ≡ (A ≃ B)
+  univalencePath' {A} {B} =
+    ua {ℓ-suc ℓ} {A ≡ B} {A ≃ B} (compEquiv (univalence {ℓ} {A} {B})
+    (isoToEquiv (iso {ℓ} {ℓ-suc ℓ} (λ x → x) (λ x → x) (λ b i → b) λ a i → a)))
+
+  instance
+    ≃-IsEquality : IsEquality {A = Type ℓ} (λ A B → (A ≃ B))
+    ≃-IsEquality = eq λ {A B} → sym λ i → univalencePath' {A = A} {B = B} i
+
+liftIso : ∀ {a b} {A : Type a} {B : Type b} → Iso {a} {b} A B → Iso {ℓ-max a b} {ℓ-max a b} A B
+liftIso {a} f = iso fun inv (λ x i → rightInv x i) (λ x i → leftInv x i)
+  where open Iso f
+
+open import leibniz
+open Leibniz
+
+module FinalEquality {A : Set} where
+  open MainResult A
+
+  ≐≅≡ : ∀ {a b} → Iso (a ≐ b) (a ≡p b)
+  ≐≅≡ = iso j i (ptoc ∘ ji) (ptoc ∘ ij)
+
+  ≐≡≡' : ∀ {a b} → (a ≐ b) ≡c (a ≡p b)
+  ≐≡≡' = let lifted = liftIso ≐≅≡  in isoToPath lifted
+
+  ≐≡≡ : _≐_ {A} ≡c _≡p_
+  ≐≡≡ i x y = ≐≡≡' {x} {y} i
+
+  open IsEquality
+
+  instance
+    ≐-IsEquality : IsEquality {A = A} _≐_
+    ≐-IsEquality = eq λ {x} {y} → ≐≡≡' ∙ λ i → ≡p-IsEquality {ℓ-zero} .≣-≡-≡ {x} {y} i
+\end{code}
 
 
 
