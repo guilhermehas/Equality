@@ -245,14 +245,20 @@ module _ {ℓ} where
   univalencePath' : {A B : Type ℓ} → (A ≡ B) ≡ (A ≃ B)
   univalencePath' {A} {B} =
     ua {ℓ-suc ℓ} {A ≡ B} {A ≃ B} (compEquiv (univalence {ℓ} {A} {B})
-    (isoToEquiv (iso {ℓ} {ℓ-suc ℓ} (λ x → x) (λ x → x) (λ b i → b) λ a i → a)))
+    (isoToEquiv (iso {ℓ} {ℓ-suc ℓ}
+    (λ x → x) (λ x → x) (λ b i → b) λ a i → a)))
 
   instance
-    ≃-IsEquality : IsEquality {A = Type ℓ} (λ A B → (A ≃ B))
-    ≃-IsEquality = eq λ {A B} → sym λ i → univalencePath' {A = A} {B = B} i
+    ≃-IsEquality : IsEquality
+      {A = Type ℓ} (λ A B → (A ≃ B))
+    ≃-IsEquality = eq λ {A B} → sym
+      λ i → univalencePath' {A = A} {B = B} i
 
-liftIso : ∀ {a b} {A : Type a} {B : Type b} → Iso {a} {b} A B → Iso {ℓ-max a b} {ℓ-max a b} A B
-liftIso {a} f = iso fun inv (λ x i → rightInv x i) (λ x i → leftInv x i)
+liftIso : ∀ {a b} {A : Type a} {B : Type b}
+  → Iso {a} {b} A B → Iso {ℓ-max a b} {ℓ-max a b} A B
+liftIso {a} f = iso fun inv
+  (λ x i → rightInv x i) (λ x i → leftInv x i)
+
   where open Iso f
 
 open import leibniz
@@ -274,7 +280,8 @@ module FinalEquality {A : Set} where
 
   instance
     ≐-IsEquality : IsEquality {A = A} _≐_
-    ≐-IsEquality = eq λ {x} {y} → ≐≡≡' ∙ λ i → ≡p-IsEquality {ℓ-zero} .≣-≡-≡ {x} {y} i
+    ≐-IsEquality = eq λ {x} {y} → ≐≡≡' ∙
+      λ i → ≡p-IsEquality {ℓ-zero} .≣-≡-≡ {x} {y} i
 \end{code}
 
 
