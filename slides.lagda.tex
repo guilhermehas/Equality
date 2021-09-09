@@ -76,18 +76,176 @@
 \DisableLigatures[-]{encoding=T1}
 
 %Information to be included in the title page:
-\title{Using quotient types in Agda}
+\title{Cubical Agda features}
 \author{Guilherme Silva}
-\institute{Scottish Programming Languages and Verification Summer School}
-\date{17th August 2021}
+\date{11th September 2021}
 
 
 \begin{document}
 
 \frame{\titlepage}
 
+\section{Cubical Agda}
+
 \begin{frame}
-  \frametitle{Motivation}
+  \frametitle{New Features}
+  The most important features in Cubical Agda are:
+
+  \begin{itemize}
+    \item New Equality Type
+    \item Quotient types
+  \end{itemize}
+\end{frame}
+
+\section{Equalities}
+
+\begin{frame}
+  \frametitle{Equalities}
+  There are multiple definitions of equalities and the most important are:
+  \begin{itemize}
+    \item Martin-Löf
+    \item Leibniz
+    \item Cubical
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Imports}
+  \begin{code}
+  {-# OPTIONS --cubical #-}
+
+  module slides where
+
+  open import Agda.Primitive.Cubical
+
+  open import Cubical.Data.Unit
+  open import Cubical.Data.Bool
+  open import Cubical.Data.Int
+  open import Cubical.Data.Nat hiding (_·_)
+  open import Cubical.Data.Prod
+  open import Cubical.Foundations.Isomorphism
+  \end{code}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Martin-Löf equality}
+  At the begin of Agda and in most theorems proves, equality is given by Martin-Löf's definition:
+  \begin{code}
+  module Martin-Löf {ℓ} {A : Set ℓ} where
+
+    data _≡_ (x : A) : A → Set ℓ where
+      refl : x ≡ x
+  \end{code}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Martin-Löf pattern match}
+  This equality is very convenient in proof assistances like Agda because it is possible to pattern match using them:
+
+  \begin{code}
+    private variable
+      x y z : A
+
+    sym  : x ≡ y → y ≡ x
+    sym refl = refl
+
+    trans : x ≡ y → y ≡ z → x ≡ z
+    trans refl refl = refl
+  \end{code}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Martin-Löf problem}
+
+  But the problem of this equality is that it does not handle extensionality and other axioms very well:
+
+  \begin{code}
+  module FunExt {ℓ ℓ'} {A : Set ℓ} {B : Set ℓ'} where
+    open Martin-Löf
+
+    funExt-Type = {f g : A → B}
+      → ((x : A) → f x ≡ g x) → f ≡ g
+  \end{code}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Cubical Equality}
+  To solve this problem, Agda adopted cubical type theory that equality is a function from the path to type:
+
+  \begin{code}
+  module CubicalEquality {ℓ} {A : Set ℓ} where
+    postulate
+      PathP : (A : I → Set ℓ) → A i0 → A i1 → Set ℓ
+
+    _≡_ : A → A → Set ℓ
+    _≡_ = PathP λ _ → A
+  \end{code}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Cubical Equality Operators}
+  From this equality, I will define reflection, symmetry and extensionality:
+
+  \begin{code}
+  module CubicalResults {ℓ ℓ'} {A : Set ℓ} {B : Set ℓ'} where
+    open import Cubical.Core.Primitives
+
+    private variable
+      x y z : A
+
+    refl : x ≡ x
+    refl {x = x} = λ _ → x
+
+    sym : x ≡ y → y ≡ x
+    sym p i = p (~ i)
+
+    funExt : {f g : A → B}
+      → ((x : A) → f x ≡ g x) → f ≡ g
+    funExt p i x = p x i
+  \end{code}
+
+  The operator $\sim$ invert the interval. If the interval \AgdaBound{i} goes from
+  \AgdaBound{i0} to \AgdaBound{i1}, the interval $\sim i$ goes from \AgdaBound{i1} to \AgdaBound{i0}.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Cubical equality computational behavior}
+  Another advantage of cubical equality is that it has a computational behavior.
+  If there is a term that has a type that two types are equal, in this term, there is information of how they are equal.
+  So this term represents the isomorphism of these two types.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Bool example}
+
+  In this example, I will show the equality of two Bools:
+
+  \begin{code}
+  module CubicalIsomorphism where
+    open import Cubical.Foundations.Prelude
+
+    IsoBool : Iso Bool Bool
+    IsoBool = iso not not ¬¬b ¬¬b
+      where
+        ¬¬b : ∀ b → not (not b) ≡ b
+        ¬¬b false = refl
+        ¬¬b true = refl
+
+    Bool≡Bool : Bool ≡ Bool
+    Bool≡Bool = isoToPath IsoBool
+
+    _ : (transport Bool≡Bool false ≡ true)
+      × (transport Bool≡Bool true ≡ false)
+    _ = refl , refl
+
+  \end{code}
+\end{frame}
+
+\section{Quotient Types}
+
+\begin{frame}
+  \frametitle{Quotient Types' Motivation}
   In simple type theories with quotient types,
   it is possible to create two distinct elements and after
   make them equal.
@@ -98,15 +256,9 @@
 \begin{frame}
   \frametitle{Imports}
   \begin{code}
-  {-# OPTIONS --cubical #-}
 
   open import Cubical.Foundations.Prelude hiding (isProp; isSet)
   open import Cubical.Relation.Nullary using (¬_)
-
-  open import Cubical.Data.Unit
-  open import Cubical.Data.Bool
-  open import Cubical.Data.Int
-  open import Cubical.Data.Nat hiding (_·_)
 
   private variable
     ℓ ℓ₁ : Level
@@ -114,37 +266,6 @@
     B : Set ℓ₁
     x y z : A
   \end{code}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Equalities}
-  In cubical type theory, equality is a function between from an interval to a set.
-  \begin{code}
-  tt≡tt : tt ≡ tt
-  tt≡tt i = tt
-
-  refl' : (x : A) → x ≡ x
-  refl' x i = x
-  \end{code}
-
-\end{frame}
-
-\begin{frame}
-  \frametitle{Equalities}
-  It is also possible to invert the path of equality.
-  If the interval i goes from i0 to i1, the interval \~{} i goes from i1 to i0.
-
-  \begin{code}
-  sym' : x ≡ y → y ≡ x
-  sym' p i = p (~ i)
-
-  ext : (f g : A → B) → (∀ x → f x ≡ g x) → f ≡ g
-  ext f g p i x = -- wants that when i = i0, f x
-                  --        and when i = i1, g x
-                  p x -- is the same of (f x ≡ g x)
-                  i
-  \end{code}
-
 \end{frame}
 
 \begin{frame}
@@ -179,7 +300,7 @@
   \frametitle{Truncation type}
 
   In truncation type, every element of it is equal.
-  Therefore we can define Bool≡ as ∥ Bool ∥.
+  Therefore we can define Bool≡ as ∥ Bool ∥:
 
   \begin{code}
   data ∥_∥ {ℓ} (A : Set ℓ) : Set ℓ where
@@ -203,7 +324,7 @@
 
 \begin{frame}
   \frametitle{Making equalities equal}
-  To make the equality equal, it is necessary when declaring a data type to state that it is a set.
+  To make the equality equal, it is necessary when declaring a data type to state that it is a set:
   \begin{code}
   isProp : Type ℓ → Type ℓ
   isProp A = (x y : A) → x ≡ y
@@ -216,7 +337,7 @@
 \begin{frame}
   \frametitle{Rational Numbers}
   Rational numbers are defined by numerator and a denominator different from zero.
-  Two rational numbers $ \frac{p_1}{q_1} $ and $ \frac{p_2}{q_2} $ are equal when $ p_1 \times q_2 \equiv p_2 \times q_1 $
+  Two rational numbers $ \frac{p_1}{q_1} $ and $ \frac{p_2}{q_2} $ are equal when $ p_1 \times q_2 \equiv p_2 \times q_1 $:
   \begin{code}
   data ℚ : Type where
     _/_[_] : (p : ℤ) (q : ℤ) → ¬ (q ≡ pos 0) → ℚ
@@ -232,7 +353,7 @@
 
 \begin{frame}
   \frametitle{Integers}
-  Another way to define integers is making the positive and negative zero equals.
+  Another way to define integers is making the positive and negative zero equals:
   \begin{code}
   data ℤ' : Type where
     pos' : ℕ → ℤ'
@@ -243,7 +364,7 @@
 
 \begin{frame}
   \frametitle{Sets}
-  One way of defining sets is to create a list where you can swap elements and remove them when they are equal.
+  One way of defining sets is to create a list where you can swap elements and remove them when they are equal:
   \begin{code}
   infixr 20 _∷_
   data LFSet (A : Type ℓ) : Type ℓ where
@@ -262,13 +383,5 @@
   _ = comm true false []
   \end{code}
 \end{frame}
-
-\begin{frame}
-  \vspace*{36 pt}
-  \begin{center}
-  {\Huge Questions?}
-  \end{center}
-\end{frame}
-
 
 \end{document}
