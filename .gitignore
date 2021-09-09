@@ -6,5 +6,12 @@
 *.aux
 *.out
 *.pdf
+*.dvi
+*.fdb_latexmk
+*.fls
+*.nav
+*.snm
+*.toc
+slides.tex
 paper.tex
 result

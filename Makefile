@@ -3,24 +3,32 @@ FIX_WHITESPACE ?= fix-whitespace
 RTS_OPTIONS = --latex --latex-dir .
 AGDA = $(AGDA_EXEC) $(RTS_OPTIONS)
 DOC = paper
+SLIDES = slides
 PDF = ${DOC}.pdf
+SLIDESPDF = ${SLIDES}.pdf
 DOCTEX = ${DOC}.tex
+SLIDESTEX = ${SLIDES}.tex
 
 LAGDA = ${DOC}.lagda.tex
+SLIDESLAGDA = ${SLIDES}.lagda.tex
 SRC = ${DOC}.tex
 LATEX ?= pdflatex
 
 all: pdf
 
-pdf: ${PDF}
+pdf: ${PDF} ${SLIDESPDF}
 
-${DOC}.pdf: ${LAGDA}
+${PDF}: ${LAGDA}
 	${AGDA}   ${LAGDA}
 	${LATEX}  ${DOCTEX}
 
+${SLIDESPDF}: ${SLIDESLAGDA}
+	${AGDA}   ${SLIDESLAGDA}
+	${LATEX}  ${SLIDESTEX}
+
 install: pdf
 	mkdir -p $(out)
-	cp ${PDF} $(out)
+	cp *.pdf $(out)
 
 clean:
 	rm -rf latex

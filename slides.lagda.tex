@@ -1,0 +1,274 @@
+\documentclass{beamer}
+
+% Use the input encoding UTF-8 and the font encoding T1.
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Support for Agda code.
+\usepackage{agda}
+
+% Decrease the indentation of code.
+\setlength{\mathindent}{1em}
+
+% Customised setup for certain characters.
+\usepackage{newunicodechar}
+\newunicodechar{∋}{$\ni$}
+% \newunicodechar{·}{$\cdot$}
+\newunicodechar{⊢}{$\vdash$}
+\newunicodechar{⋆}{${}^\star$}
+\newunicodechar{Π}{$\Pi$}
+\newunicodechar{⇒}{$\Rightarrow$}
+\newunicodechar{ƛ}{$\lambdabar$}
+\newunicodechar{∅}{$\emptyset$}
+\newunicodechar{∀}{$\forall$}
+\newunicodechar{ϕ}{$\Phi$}
+\newunicodechar{ψ}{$\Psi$}
+\newunicodechar{ρ}{$\rho$}
+\newunicodechar{α}{$\alpha$}
+\newunicodechar{β}{$\beta$}
+\newunicodechar{μ}{$\mu$}
+\newunicodechar{σ}{$\sigma$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{Γ}{$\Gamma$}
+\newunicodechar{∥}{$\parallel$}
+\newunicodechar{Λ}{$\Lambda$}
+\newunicodechar{₀}{$~_0$}
+\newunicodechar{₁}{$~_1$}
+\newunicodechar{₂}{$~_2$}
+\newunicodechar{θ}{$\theta$}
+\newunicodechar{Θ}{$\Theta$}
+\newunicodechar{∘}{$\circ$}
+\newunicodechar{Δ}{$\Delta$}
+\newunicodechar{λ}{$\lambda$}
+\newunicodechar{⊧}{$\models$}
+\newunicodechar{⊎}{$\uplus$}
+\newunicodechar{η}{$\eta$}
+\newunicodechar{⊥}{$\bot$}
+\newunicodechar{Σ}{$\Sigma$}
+\newunicodechar{ξ}{$\xi$}
+\newunicodechar{ℕ}{$\mathbb{N}$}
+\newunicodechar{ᶜ}{${}^c$}
+\newunicodechar{Φ}{$\Phi$}
+\newunicodechar{Ψ}{$\Psi$}
+\newunicodechar{⊤}{$\top$}
+\newunicodechar{≐}{$\doteq$}
+\newunicodechar{≣}{$\triangleq$}
+\newunicodechar{≃}{$\simeq$}
+\newunicodechar{≅}{$\cong$}
+\newunicodechar{∙}{$\bullet$}
+\newunicodechar{ℓ}{$\ell$}
+% \newunicodechar{}{$$}
+
+
+\newunicodechar{∣}{\ensuremath{\mathnormal{\|}}}
+\newunicodechar{∷}{\ensuremath{::}}
+\newunicodechar{ℕ}{\ensuremath{\mathnormal{\mathbb{N}}}}
+\newunicodechar{ℚ}{\ensuremath{\mathnormal{\mathbb{Q}}}}
+\newunicodechar{ℤ}{\ensuremath{\mathnormal{\mathbb{Z}}}}
+\newunicodechar{∥}{\ensuremath{\mathnormal{\||}}}
+
+% Support for Greek letters.
+\usepackage{alphabeta}
+
+% Disable ligatures that start with '-'. Note that this affects the
+% entire document!
+\usepackage{microtype}
+\DisableLigatures[-]{encoding=T1}
+
+%Information to be included in the title page:
+\title{Using quotient types in Agda}
+\author{Guilherme Silva}
+\institute{Scottish Programming Languages and Verification Summer School}
+\date{17th August 2021}
+
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+  \frametitle{Motivation}
+  In simple type theories with quotient types,
+  it is possible to create two distinct elements and after
+  make them equal.
+
+  One of the best examples is making $ \frac{1}{2} $ and $ \frac{2}{4} $ be equal elements.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Imports}
+  \begin{code}
+  {-# OPTIONS --cubical #-}
+
+  open import Cubical.Foundations.Prelude hiding (isProp; isSet)
+  open import Cubical.Relation.Nullary using (¬_)
+
+  open import Cubical.Data.Unit
+  open import Cubical.Data.Bool
+  open import Cubical.Data.Int
+  open import Cubical.Data.Nat hiding (_·_)
+
+  private variable
+    ℓ ℓ₁ : Level
+    A : Set ℓ
+    B : Set ℓ₁
+    x y z : A
+  \end{code}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Equalities}
+  In cubical type theory, equality is a function between from an interval to a set.
+  \begin{code}
+  tt≡tt : tt ≡ tt
+  tt≡tt i = tt
+
+  refl' : (x : A) → x ≡ x
+  refl' x i = x
+  \end{code}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Equalities}
+  It is also possible to invert the path of equality.
+  If the interval i goes from i0 to i1, the interval \~{} i goes from i1 to i0.
+
+  \begin{code}
+  sym' : x ≡ y → y ≡ x
+  sym' p i = p (~ i)
+
+  ext : (f g : A → B) → (∀ x → f x ≡ g x) → f ≡ g
+  ext f g p i x = -- wants that when i = i0, f x
+                  --        and when i = i1, g x
+                  p x -- is the same of (f x ≡ g x)
+                  i
+  \end{code}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{The simplest example of quotient types}
+  This is an example when two elements of the same data types are equal:
+  \begin{code}
+  data Bool≡ : Set where
+    true false : Bool≡
+    t≡f : true ≡ false
+
+  _ : true ≡ false
+  _ = t≡f
+  \end{code}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Functions of quotient types}
+  Let a function f between elements of Bool≡ and another set, \\
+  if $ x \equiv y $, then $ f(x) \equiv f(y) $.
+  In this case, $ x $ is true, $ y $ is false and $ f(x) $ is tt.
+  \begin{code}
+  f : Bool≡ → Unit
+  f true    = tt
+  f false   = tt
+  f (t≡f i) = refl i -- proving that f true ≡ f false
+
+  \end{code}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Truncation type}
+
+  In truncation type, every element of it is equal.
+  Therefore we can define Bool≡ as ∥ Bool ∥.
+
+  \begin{code}
+  data ∥_∥ {ℓ} (A : Set ℓ) : Set ℓ where
+    ∣_∣ : A → ∥ A ∥
+    squash : ∀ (x y : ∥ A ∥) → x ≡ y
+
+  Bool≡' = ∥ Bool ∥
+  \end{code}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Not all equalities are the same}
+  In cubical type theory, the equalities are not always the same.
+  In this example, the circle is isomorphic (the same) to the integers:
+  \begin{code}
+  data Circle : Type where
+    base : Circle
+    loop : base ≡ base
+  \end{code}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Making equalities equal}
+  To make the equality equal, it is necessary when declaring a data type to state that it is a set.
+  \begin{code}
+  isProp : Type ℓ → Type ℓ
+  isProp A = (x y : A) → x ≡ y
+
+  isSet : Type ℓ → Type ℓ
+  isSet A = (x y : A) → isProp (x ≡ y)
+  \end{code}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Rational Numbers}
+  Rational numbers are defined by numerator and a denominator different from zero.
+  Two rational numbers $ \frac{p_1}{q_1} $ and $ \frac{p_2}{q_2} $ are equal when $ p_1 \times q_2 \equiv p_2 \times q_1 $
+  \begin{code}
+  data ℚ : Type where
+    _/_[_] : (p : ℤ) (q : ℤ) → ¬ (q ≡ pos 0) → ℚ
+    path : ∀ p₁ q₁ p₂ q₂ {pr₁ pr₂} → (p₁ · q₂) ≡ (p₂ · q₁)
+      → p₁ / q₁ [ pr₁ ] ≡ p₂ / q₂ [ pr₂ ]
+    trunc : isSet ℚ
+
+  _ : ∀ {pr₁ : ¬ (2 ≡ pos 0)} {pr₂ : ¬ (4 ≡ pos 0)}
+    → 1 / 2 [ pr₁ ] ≡ 2 / 4 [ pr₂ ]
+  _ = path 1 2 2 4 refl
+  \end{code}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Integers}
+  Another way to define integers is making the positive and negative zero equals.
+  \begin{code}
+  data ℤ' : Type where
+    pos' : ℕ → ℤ'
+    neg' : ℕ → ℤ'
+    0+-≡ : pos' 0 ≡ neg' 0
+  \end{code}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Sets}
+  One way of defining sets is to create a list where you can swap elements and remove them when they are equal.
+  \begin{code}
+  infixr 20 _∷_
+  data LFSet (A : Type ℓ) : Type ℓ where
+    []    : LFSet A
+    _∷_   : (x : A) → (xs : LFSet A) → LFSet A
+    dup   : ∀ x xs   → x ∷ x ∷ xs ≡ x ∷ xs
+    comm  : ∀ x y xs → x ∷ y ∷ xs ≡ y ∷ x ∷ xs
+    trunc : isSet (LFSet A)
+
+  _ : tt ∷ tt ∷ [] ≡ tt ∷ []
+  _ = dup tt []
+
+  _ : let true∷false : LFSet Bool
+          true∷false = true ∷ false ∷ []
+      in true∷false ≡ false ∷ true ∷ []
+  _ = comm true false []
+  \end{code}
+\end{frame}
+
+\begin{frame}
+  \vspace*{36 pt}
+  \begin{center}
+  {\Huge Questions?}
+  \end{center}
+\end{frame}
+
+
+\end{document}
