@@ -32,10 +32,10 @@ install: pdf
 
 clean:
 	rm -rf latex
+	rm -f *.{log,aux,dvi,toc,ptb,snm,out,nav,fdb_latexmk,fls}
 
 distclean: clean
 	rm -f *.agdai
 	rm -f _region_.tex
 	rm -rf .auctex-auto
-	rm -f *.log
 	rm -f result
