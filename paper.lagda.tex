@@ -84,17 +84,6 @@
 
 \begin{document}
 
-\AgdaHide{
-\begin{code}
-{-# OPTIONS --cubical --type-in-type #-}
-
-module paper where
-
-open import Agda.Primitive.Cubical
-\end{code}
-}
-
-
 \maketitle
 
 \begin{abstract}
@@ -106,6 +95,24 @@ open import Agda.Primitive.Cubical
 
 There are multiple ways of defining equalities in a theorem prover.
 In the next sections, they will be defined.
+
+\subsection{Imports}
+
+First, it will be necessary to give some agda arguments:
+
+\begin{code}
+{-# OPTIONS --cubical --cumulativity #-}
+module paper where
+\end{code}
+
+The cubical flag is necessary because we are using cubical equality,
+and the cumulativiy flag is also necessary for level subtyping,
+
+\begin{code}
+open import Agda.Primitive.Cubical using (I; i0; i1)
+\end{code}
+
+This library loads Cubical Agda Primitives as the equality interval.
 
 \subsection{Martin-Löf Equality}
 
@@ -185,9 +192,9 @@ then \AgdaBound{P b}.
 The main idea is that if both values are equal, then they are seen equal for every angle.
 
 \begin{code}
-module LeibnizEquality {ℓ} {ℓ'} {A : Set ℓ} where
-  _≐_ : A → A → Set
-  a ≐ b = (P : A → Set ℓ') → P a → P b
+module LeibnizEquality {A : Set} where
+  _≐_ : A → A → Set₁
+  a ≐ b = (P : A → Set) → P a → P b
 \end{code}
 
 \section{Joining all equalities}
@@ -230,61 +237,105 @@ module _ {a ℓ} {A : Set a} where
 
 It will be defined for each equality, its instance:
 
+\subsection{Cubical Equality}
+
+The simplest example is the cubical equality hence this equality is already equal to itself.
+
 \begin{code}
 module _ {a} {A : Set a} where
   instance
     ≡-IsEquality : IsEquality {A = A} _≡_
     ≡-IsEquality = eq refl
+\end{code}
 
+\subsection{Martin-Löf equality}
+
+The proof of Martin-Löf equality is more difficult, but it is already in Cubical library as \AgdaFunction{p-c}.
+
+\begin{code}
   instance
     ≡p-IsEquality : IsEquality {A = A} _≡p_
     ≡p-IsEquality = eq (λ {x y} → sym λ i → p-c {x = x} {y = y} i)
+\end{code}
 
+\subsection{Isomorphism}
 
+The isomorphism is an equality between types.
+
+\begin{code}
 module _ {ℓ} where
   univalencePath' : {A B : Type ℓ} → (A ≡ B) ≡ (A ≃ B)
   univalencePath' {A} {B} =
     ua {ℓ-suc ℓ} {A ≡ B} {A ≃ B} (compEquiv (univalence {ℓ} {A} {B})
     (isoToEquiv (iso {ℓ} {ℓ-suc ℓ}
     (λ x → x) (λ x → x) (λ b i → b) λ a i → a)))
+\end{code}
 
+\AgdaFunction{univalencePath} is already defined in Agda library, but with \AgdaBound{A ≃ B} instead of
+\AgdaBound{Lifted (A ≃ B)}. This change can be done because of the cumulativity flag.
+
+\begin{code}
   instance
     ≃-IsEquality : IsEquality
-      {A = Type ℓ} (λ A B → (A ≃ B))
+      {A = Type ℓ} _≃_
     ≃-IsEquality = eq λ {A B} → sym
       λ i → univalencePath' {A = A} {B = B} i
+\end{code}
 
+\subsection{Leibniz Equality}
+
+The hardest equality to proof that is equalty is the Leibniz Equality.
+
+\begin{code}
 liftIso : ∀ {a b} {A : Type a} {B : Type b}
   → Iso {a} {b} A B → Iso {ℓ-max a b} {ℓ-max a b} A B
 liftIso {a} f = iso fun inv
   (λ x i → rightInv x i) (λ x i → leftInv x i)
+\end{code}
 
+This \AgdaFunction{liftIso} will be used to lift the Isomorphism to types of the same maximum level of both.
+
+\begin{code}
   where open Iso f
 
 open import leibniz
 open Leibniz
+\end{code}
 
+It is importing the definition of Leibniz equality made by \cite{abel2020leibniz}.
+In this work, there is already a proof of the isomorphism between the Leibniz and the Martin-Löf equality.
+
+\begin{code}
 module FinalEquality {A : Set} where
   open MainResult A
 
   ≐≅≡ : ∀ {a b} → Iso (a ≐ b) (a ≡p b)
   ≐≅≡ = iso j i (ptoc ∘ ji) (ptoc ∘ ij)
+\end{code}
 
-  ≐≡≡' : ∀ {a b} → (a ≐ b) ≡c (a ≡p b)
-  ≐≡≡' = let lifted = liftIso ≐≅≡  in isoToPath lifted
+In Cubical Library, the definition of isomorphism uses cubical equality instead of Martin-Löf equality
+when we have to proof that \AgdaBound{∀ x → from (to x) ≡ x} and \AgdaBound{∀ x → to (from x) ≡ x}.
+\AgdaFunction{ptoc} is necessary to do this convertion from these equalities.
 
-  ≐≡≡ : _≐_ {A} ≡c _≡p_
-  ≐≡≡ i x y = ≐≡≡' {x} {y} i
+\begin{code}
+  ≐≡≡ : ∀ {a b} → (a ≐ b) ≡c (a ≡p b)
+  ≐≡≡ = let lifted = liftIso ≐≅≡  in isoToPath lifted
+\end{code}
 
+Using the univalence and \AgdaFunction{liftIso} defined previously, it is possible to transform the isormorphism
+into an equality.
+
+\begin{code}
   open IsEquality
 
   instance
     ≐-IsEquality : IsEquality {A = A} _≐_
-    ≐-IsEquality = eq λ {x} {y} → ≐≡≡' ∙
+    ≐-IsEquality = eq λ {x} {y} → ≐≡≡ ∙
       λ i → ≡p-IsEquality {ℓ-zero} .≣-≡-≡ {x} {y} i
 \end{code}
 
-
+The last pass is to join the three equalities between equalities:
+Leibniz to Martin-Löf to cubical equality.
 
 \section*{Acknowledgements}
 
