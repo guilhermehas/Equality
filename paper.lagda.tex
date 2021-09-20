@@ -337,6 +337,27 @@ into an equality.
 The last pass is to join the three equalities between equalities:
 Leibniz to Martin-Löf to cubical equality.
 
+\begin{code}
+module Equalities {a ℓ} {A : Set a} where
+  ≣-Type' = ≣-Type {a} {ℓ} {A}
+  open IsEquality
+
+  variable
+    _≡₁_ : ≣-Type'
+    _≡₂_ : ≣-Type'
+    x y : A
+
+
+  alwaysEqual :
+    IsEquality _≡₁_ →
+    IsEquality _≡₂_ →
+    x ≡₁ y → x ≡₂ y
+  alwaysEqual eq₁ eq₂ p =
+    let joined = eq₁ .≣-≡-≡ ∙ sym (eq₂ .≣-≡-≡)
+    in transport joined p
+
+\end{code}
+
 \section*{Acknowledgements}
 
 
