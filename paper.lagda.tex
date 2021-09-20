@@ -342,19 +342,21 @@ module Equalities {a ℓ} {A : Set a} where
   ≣-Type' = ≣-Type {a} {ℓ} {A}
   open IsEquality
 
-  variable
-    _≡₁_ : ≣-Type'
-    _≡₂_ : ≣-Type'
-    x y : A
+  module _
+    (_≡₁_ : ≣-Type')
+    (_≡₂_ : ≣-Type')
+    ⦃ eq₁ : IsEquality {a} {ℓ} _≡₁_ ⦄
+    ⦃ eq₂ : IsEquality _≡₂_ ⦄
+    where
 
+    variable
+      x y : A
 
-  alwaysEqual :
-    IsEquality _≡₁_ →
-    IsEquality _≡₂_ →
-    x ≡₁ y → x ≡₂ y
-  alwaysEqual eq₁ eq₂ p =
-    let joined = eq₁ .≣-≡-≡ ∙ sym (eq₂ .≣-≡-≡)
-    in transport joined p
+    alwaysEqual :  x ≡₁ y → x ≡₂ y
+    alwaysEqual p =
+      let joined = eq₁ .≣-≡-≡ ∙ sym (eq₂ .≣-≡-≡)
+      in transport joined p
+
 
 \end{code}
 
