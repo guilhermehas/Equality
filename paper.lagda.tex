@@ -403,6 +403,15 @@ module Equalities {a ℓ} {A : Set a} where
       in transport joined p
       where open IsEquality₂ ≡₂-Equality₂
 
+    module _ {_≣_ : ≣-Type} where
+      sym-Equality₂ : (≡-≡-≣ : {x y : A} → let
+        x≡y : Type (ℓ-max a ℓ)
+        x≡y = x ≡₁ y
+        x≣y = x ≣ y
+        in x≡y ≡ x≣y)
+        → IsEquality₂ _≣_
+      sym-Equality₂ ≡-≡-≣ = eq (sym ≡-≡-≣)
+
     module _
       (_≡₃_ : ≣-Type {ℓ-suc ℓ₁} {a})
       ⦃ eq₃ : IsEquality _≡₃_ ⦄
@@ -445,6 +454,19 @@ module Equalities {a ℓ} {A : Set a} where
             open IsEquality eq₃
             α : ∀ {x y} → (x ≡₂ y) ≡₃ (x ≡₁ y)
             α = transport ≡-≡-≣ (IsEquality₂.≣-≡-≡ ≡₂-Equality₂)
+
+      module _ {_≣_ : ≣-Type'} where
+        sym-Equality₃ : (≡-≡-≣ : {x y : A} → let
+          x≡y : Type (ℓ-max a ℓ)
+          x≡y = x ≡₁ y
+          x≣y = x ≣ y
+          in x≡y ≡₃ x≣y)
+          → IsEquality₃ _≣_
+        sym-Equality₃ ≡-≡-≣ = eq (let
+          α₁ = IsEquality.≡-≡-≣ eq₃
+          α₂ = transport (sym α₁) ≡-≡-≣
+          in transport α₁ (sym α₂))
+
 
 \end{code}
 
