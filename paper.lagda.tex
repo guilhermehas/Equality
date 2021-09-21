@@ -239,7 +239,7 @@ module _ {a ℓ} {A : Set a} where
       in x≡y ≡ x≣y
     ≡-≡-≣ = sym ≣-≡-≡
 
-  module _ (_≣_ : ≣-Type) where
+  module _ {_≣_ : ≣-Type} where
     sym-Equality : (≡-≡-≣ : {x y : A} → let
       x≡y : Type (ℓ-max a ℓ)
       x≡y = x ≡ y
@@ -274,7 +274,7 @@ The proof of Martin-Löf equality is more difficult, but it is already in Cubica
 \begin{code}
   instance
     ≡p-IsEquality : IsEquality {A = A} _≡p_
-    ≡p-IsEquality = eq (λ {x y} → sym λ i → p-c {x = x} {y = y} i)
+    ≡p-IsEquality = sym-Equality (λ {x y} → λ i → p-c {x = x} {y = y} i)
 \end{code}
 
 \subsection{Isomorphism}
@@ -297,7 +297,7 @@ module _ {ℓ} where
   instance
     ≃-IsEquality : IsEquality
       {A = Type ℓ} _≃_
-    ≃-IsEquality = eq λ {A B} → sym
+    ≃-IsEquality = sym-Equality λ {A B} →
       λ i → univalencePath' {A = A} {B = B} i
 \end{code}
 
@@ -444,10 +444,7 @@ module Equalities {a ℓ} {A : Set a} where
           where
             open IsEquality eq₃
             α : ∀ {x y} → (x ≡₂ y) ≡₃ (x ≡₁ y)
-            α {x} {y} = let
-              α₁ = ≣-≡-≡ {x ≡₂ y} {x ≡₁ y}
-              α₂ = IsEquality₂.≣-≡-≡ ≡₂-Equality₂ {x} {y}
-              in transport (sym α₁) α₂
+            α = transport ≡-≡-≣ (IsEquality₂.≣-≡-≡ ≡₂-Equality₂)
 
 \end{code}
 
