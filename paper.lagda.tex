@@ -340,7 +340,6 @@ Leibniz to Martin-Löf to cubical equality.
 \begin{code}
 module Equalities {a ℓ} {A : Set a} where
   ≣-Type' = ≣-Type {a} {ℓ} {A}
-  open IsEquality
 
   module _
     (_≡₁_ : ≣-Type')
@@ -349,14 +348,69 @@ module Equalities {a ℓ} {A : Set a} where
     ⦃ eq₂ : IsEquality _≡₂_ ⦄
     where
 
-    variable
-      x y : A
+    ℓ₁ = ℓ-max a ℓ
 
-    alwaysEqual :  x ≡₁ y → x ≡₂ y
-    alwaysEqual p =
-      let joined = eq₁ .≣-≡-≡ ∙ sym (eq₂ .≣-≡-≡)
+    record IsEquality₂ (_≣_ : ≣-Type') : Set (ℓ-suc (ℓ-max a ℓ)) where
+      constructor eq
+      field
+        ≣-≡-≡ : ∀ {x y} → let
+          x≡y : Type ℓ₁
+          x≡y = x ≡₁ y
+
+          x≣y : Type ℓ₁
+          x≣y = x ≣ y
+
+          in _≡_ {ℓ-suc ℓ₁} x≣y x≡y
+
+      instance
+        isEquality : IsEquality _≣_
+        isEquality = eq (≣-≡-≡ ∙ IsEquality.≣-≡-≡ eq₁)
+
+    instance
+      ≡₂-Equality₂ : IsEquality₂ _≡₂_
+      ≡₂-Equality₂ = eq (eq₂ .≣-≡-≡ ∙ sym (eq₁ .≣-≡-≡))
+        where open IsEquality
+
+    alwaysEqual : ∀ {x y} →  x ≡₁ y → x ≡₂ y
+    alwaysEqual {x} {y} p =
+      let joined = sym (≣-≡-≡ {x} {y})
       in transport joined p
+      where open IsEquality₂ ≡₂-Equality₂
 
+    module _
+      (_≡₃_ : ≣-Type {ℓ-suc ℓ₁} {a})
+      ⦃ eq₃ : IsEquality _≡₃_ ⦄
+      where
+
+      record IsEquality₃ (_≣_ : ≣-Type') : Set (ℓ-suc (ℓ-max a ℓ)) where
+        constructor eq
+        field
+          ≣-≡-≡ : ∀ {x y} → let
+            x≡y : Type ℓ₁
+            x≡y = x ≡₁ y
+
+            x≣y : Type ℓ₁
+            x≣y = x ≣ y
+
+            in x≣y ≡₃ x≡y
+
+        instance
+          isEquality₂ : IsEquality₂ _≣_
+          isEquality₂ = eq (transport (IsEquality.≣-≡-≡ eq₃) ≣-≡-≡)
+
+          isEquality : IsEquality _≣_
+          isEquality = eq (IsEquality₂.≣-≡-≡ isEquality₂ ∙ IsEquality.≣-≡-≡ eq₁)
+
+      instance
+        ≡₂-Equality₃ : IsEquality₃ _≡₂_
+        ≡₂-Equality₃ = eq α
+          where
+            open IsEquality eq₃
+            α : ∀ {x y} → (x ≡₂ y) ≡₃ (x ≡₁ y)
+            α {x} {y} = let
+              α₁ = ≣-≡-≡ {x ≡₂ y} {x ≡₁ y}
+              α₂ = IsEquality₂.≣-≡-≡ ≡₂-Equality₂ {x} {y}
+              in transport (sym α₁) α₂
 
 \end{code}
 
