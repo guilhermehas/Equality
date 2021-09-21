@@ -359,17 +359,14 @@ Leibniz to Martin-Löf to cubical equality.
 \begin{code}
 module Equalities {a ℓ} {A : Set a} where
   ≣-Type' = ≣-Type {a} {ℓ} {A}
+  ℓ₁ = ℓ-max a ℓ
 
   module _
     (_≡₁_ : ≣-Type')
-    (_≡₂_ : ≣-Type')
     ⦃ eq₁ : IsEquality {a} {ℓ} _≡₁_ ⦄
-    ⦃ eq₂ : IsEquality _≡₂_ ⦄
     where
 
-    ℓ₁ = ℓ-max a ℓ
-
-    record IsEquality₂ (_≣_ : ≣-Type') : Set (ℓ-suc (ℓ-max a ℓ)) where
+    record IsEquality₂ (_≣_ : ≣-Type') : Set (ℓ-suc ℓ₁) where
       constructor eq
       field
         ≣-≡-≡ : ∀ {x y} → let
@@ -392,32 +389,37 @@ module Equalities {a ℓ} {A : Set a} where
         isEquality : IsEquality _≣_
         isEquality = eq (≣-≡-≡ ∙ IsEquality.≣-≡-≡ eq₁)
 
-    instance
-      ≡₂-Equality₂ : IsEquality₂ _≡₂_
-      ≡₂-Equality₂ = eq (eq₂ .≣-≡-≡ ∙ sym (eq₁ .≣-≡-≡))
-        where open IsEquality
+    module _
+      (_≡₂_ : ≣-Type')
+      ⦃ eq₂ : IsEquality _≡₂_ ⦄
+      where
 
-    alwaysEqual : ∀ {x y} →  x ≡₁ y → x ≡₂ y
-    alwaysEqual {x} {y} p =
-      let joined = sym (≣-≡-≡ {x} {y})
-      in transport joined p
-      where open IsEquality₂ ≡₂-Equality₂
+      instance
+        ≡₂-Equality₂ : IsEquality₂ _≡₂_
+        ≡₂-Equality₂ = eq (eq₂ .≣-≡-≡ ∙ sym (eq₁ .≣-≡-≡))
+          where open IsEquality
 
-    module _ {_≣_ : ≣-Type} where
-      sym-Equality₂ : (≡-≡-≣ : {x y : A} → let
-        x≡y : Type (ℓ-max a ℓ)
-        x≡y = x ≡₁ y
-        x≣y = x ≣ y
-        in x≡y ≡ x≣y)
-        → IsEquality₂ _≣_
-      sym-Equality₂ ≡-≡-≣ = eq (sym ≡-≡-≣)
+      alwaysEqual : ∀ {x y} →  x ≡₁ y → x ≡₂ y
+      alwaysEqual {x} {y} p =
+        let joined = sym (≣-≡-≡ {x} {y})
+        in transport joined p
+        where open IsEquality₂ ≡₂-Equality₂
+
+      module _ {_≣_ : ≣-Type} where
+        sym-Equality₂ : (≡-≡-≣ : {x y : A} → let
+          x≡y : Type (ℓ-max a ℓ)
+          x≡y = x ≡₁ y
+          x≣y = x ≣ y
+          in x≡y ≡ x≣y)
+          → IsEquality₂ _≣_
+        sym-Equality₂ ≡-≡-≣ = eq (sym ≡-≡-≣)
 
     module _
       (_≡₃_ : ≣-Type {ℓ-suc ℓ₁} {a})
       ⦃ eq₃ : IsEquality _≡₃_ ⦄
       where
 
-      record IsEquality₃ (_≣_ : ≣-Type') : Set (ℓ-suc (ℓ-max a ℓ)) where
+      record IsEquality₃ (_≣_ : ≣-Type') : Set (ℓ-suc ℓ₁) where
         constructor eq
         field
           ≣-≡-≡ : ∀ {x y} → let
@@ -447,13 +449,18 @@ module Equalities {a ℓ} {A : Set a} where
           α₃ = IsEquality.≡-≡-≣ isEquality
           in transport α₁ (α₂ ∙ α₃)
 
-      instance
-        ≡₂-Equality₃ : IsEquality₃ _≡₂_
-        ≡₂-Equality₃ = eq α
-          where
-            open IsEquality eq₃
-            α : ∀ {x y} → (x ≡₂ y) ≡₃ (x ≡₁ y)
-            α = transport ≡-≡-≣ (IsEquality₂.≣-≡-≡ ≡₂-Equality₂)
+      module _
+        (_≡₂_ : ≣-Type')
+        ⦃ eq₂ : IsEquality _≡₂_ ⦄
+        where
+
+        instance
+          ≡₂-Equality₃ : IsEquality₃ _≡₂_
+          ≡₂-Equality₃ = eq α
+            where
+              open IsEquality eq₃
+              α : ∀ {x y} → (x ≡₂ y) ≡₃ (x ≡₁ y)
+              α = transport ≡-≡-≣ (IsEquality₂.≣-≡-≡ (≡₂-Equality₂ _≡₂_))
 
       module _ {_≣_ : ≣-Type'} where
         sym-Equality₃ : (≡-≡-≣ : {x y : A} → let
@@ -466,8 +473,6 @@ module Equalities {a ℓ} {A : Set a} where
           α₁ = IsEquality.≡-≡-≣ eq₃
           α₂ = transport (sym α₁) ≡-≡-≣
           in transport α₁ (sym α₂))
-
-
 \end{code}
 
 \section*{Acknowledgements}
