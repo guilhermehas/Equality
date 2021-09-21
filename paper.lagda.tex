@@ -232,6 +232,22 @@ module _ {a ℓ} {A : Set a} where
 
         in _≡_ {ℓ-suc ℓ₁} x≣y x≡y
 
+    ≡-≡-≣ : {x y : A} → let
+      x≡y : Type (ℓ-max a ℓ)
+      x≡y = x ≡ y
+      x≣y = x ≣ y
+      in x≡y ≡ x≣y
+    ≡-≡-≣ = sym ≣-≡-≡
+
+  module _ (_≣_ : ≣-Type) where
+    sym-Equality : (≡-≡-≣ : {x y : A} → let
+      x≡y : Type (ℓ-max a ℓ)
+      x≡y = x ≡ y
+      x≣y = x ≣ y
+      in x≡y ≡ x≣y)
+      → IsEquality _≣_
+    sym-Equality ≡-≡-≣ = eq (sym ≡-≡-≣)
+
   record Equality : Set (ℓ-suc (ℓ-max a ℓ)) where
     field
       _≣_ : ≣-Type
@@ -365,6 +381,13 @@ module Equalities {a ℓ} {A : Set a} where
 
           in _≡_ {ℓ-suc ℓ₁} x≣y x≡y
 
+      ≡-≡-≣ : {x y : A} → let
+        x≡y : Type ℓ₁
+        x≡y = x ≡₁ y
+        x≣y = x ≣ y
+        in x≡y ≡ x≣y
+      ≡-≡-≣ = sym ≣-≡-≡
+
       instance
         isEquality : IsEquality _≣_
         isEquality = eq (≣-≡-≡ ∙ IsEquality.≣-≡-≡ eq₁)
@@ -403,6 +426,17 @@ module Equalities {a ℓ} {A : Set a} where
 
           isEquality : IsEquality _≣_
           isEquality = eq (IsEquality₂.≣-≡-≡ isEquality₂ ∙ IsEquality.≣-≡-≡ eq₁)
+
+        ≡-≡-≣ : {x y : A} → let
+          x≡y : Type ℓ₁
+          x≡y = x ≡₁ y
+          x≣y = x ≣ y
+          in x≡y ≡₃ x≣y
+        ≡-≡-≣ = let
+          α₁ = IsEquality.≡-≡-≣ eq₃
+          α₂ = IsEquality.≣-≡-≡ eq₁
+          α₃ = IsEquality.≡-≡-≣ isEquality
+          in transport α₁ (α₂ ∙ α₃)
 
       instance
         ≡₂-Equality₃ : IsEquality₃ _≡₂_
