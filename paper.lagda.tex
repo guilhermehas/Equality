@@ -473,6 +473,27 @@ module Equalities {a ℓ} {A : Set a} where
           α₁ = IsEquality.≡-≡-≣ eq₃
           α₂ = transport (sym α₁) ≡-≡-≣
           in transport α₁ (sym α₂))
+
+module _ {A : Set} where
+  open Equalities {ℓ-zero} {ℓ-suc ℓ-zero} {A}
+
+  _≡p₁_ : A → A → Set₁
+  x ≡p₁ y = x ≡p y
+
+  _ = ≡p-IsEquality
+  instance
+    ≡p₁-isEquality : IsEquality _≡p₁_
+    ≡p₁-isEquality = eq λ {x y} → (sym λ i → let
+      α : Type₁
+      α = p-c {ℓ-zero} {A} {x = x} {y = y} i
+      in α)
+
+
+
+  leibniz : IsEquality  (_≐_ {A})
+  leibniz =
+    IsEquality₂.isEquality (eq λ {x y} → FinalEquality.≐≡≡ {_} {x} {y})
+
 \end{code}
 
 \section*{Acknowledgements}
