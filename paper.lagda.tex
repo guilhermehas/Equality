@@ -382,30 +382,56 @@ into an equality.
 The last pass is to join the three equalities between equalities:
 Leibniz to Martin-Löf to cubical equality.
 
+\section{New Equalities types}
+
+The equalities used previously were defined using the cubical equality.
+Now I will define them using other equalities.
+
+% \end{code}
+% \begin{code}
+
 \begin{code}
 module Equalities {a ℓ} {A : Set a} where
   private
     ≣-Type' = ≣-Type {a} {ℓ} {A}
     ℓ₁ = ℓ-max a ℓ
+\end{code}
 
+Loaded the modules using the levels to be more generic.
+
+\begin{code}
   module _
     (Eq₁ : Equality {_} {ℓ} {A})
     where
 
     open Equality Eq₁ renaming (_≣_ to _≡₁_; isEquality to eq₁)
+\end{code}
 
+I am importing a generic equality to use it to define a more generic equality.
+
+\begin{code}
     record IsEquality₂ (_≣_ : ≣-Type') : Set (ℓ-suc ℓ₁) where
       constructor eq
       field
         ≣-≡-≡ : ∀ {x y} → let
           x≡y : Type ℓ₁
           x≡y = x ≡₁ y
+\end{code}
 
+Different from previously definition of \AgdaFunction{IsEquality},
+the cubical equality defined in the line above was substituted by
+the more generic equality \AgdaFunction{≡₁}.
+
+\begin{code}
           x≣y : Type ℓ₁
           x≣y = x ≣ y
 
           in _≡_ {ℓ-suc ℓ₁} x≣y x≡y
+\end{code}
 
+The rest of the definition is the same.
+
+\begin{code}
       ≡-≡-≣ : {x y : A} → let
         x≡y : Type ℓ₁
         x≡y = x ≡₁ y
