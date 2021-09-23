@@ -217,13 +217,13 @@ open import Cubical.Data.Equality
 
 module _ {a ℓ} {A : Set a} where
   ≣-Type = A → A → Set ℓ
+  private
+    ℓ₁ = ℓ-max a ℓ
 
   record IsEquality (_≣_ : ≣-Type) : Set (ℓ-suc (ℓ-max a ℓ)) where
     constructor eq
     field
       ≣-≡-≡ : ∀ {x y} → let
-        ℓ₁ = ℓ-max a ℓ
-
         x≡y : Type ℓ₁
         x≡y = x ≡ y
 
@@ -249,9 +249,26 @@ module _ {a ℓ} {A : Set a} where
     sym-Equality ≡-≡-≣ = eq (sym ≡-≡-≣)
 
   record Equality : Set (ℓ-suc (ℓ-max a ℓ)) where
+    constructor eqC
     field
       _≣_ : ≣-Type
-      isEquality : IsEquality _≣_
+      ⦃ isEquality ⦄ : IsEquality _≣_
+
+  EqFromInstance : {≣ : ≣-Type} → IsEquality ≣ → Equality
+  EqFromInstance inst = eqC _ ⦃ inst ⦄
+
+  eqsEqual : (_≣₁_ _≣₂_ : ≣-Type)
+    ⦃ ≣₁-eq : IsEquality _≣₁_ ⦄
+    ⦃ ≣₂-eq : IsEquality _≣₂_ ⦄
+    → ∀ {x y} → let
+      x≣₁y : Type ℓ₁
+      x≣₁y = x ≣₁ y
+
+      x≣₂y : Type ℓ₁
+      x≣₂y = x ≣₂ y
+
+      in _≡_ {ℓ-suc ℓ₁} x≣₁y x≣₂y
+  eqsEqual _≣₁_ _≣₂_ ⦃ eq ≣-≡-≡₁ ⦄ ⦃ eq ≣-≡-≡₂ ⦄ = ≣-≡-≡₁ ∙ sym ≣-≡-≡₂
 \end{code}
 
 It will be defined for each equality, its instance:
@@ -265,6 +282,9 @@ module _ {a} {A : Set a} where
   instance
     ≡-IsEquality : IsEquality {A = A} _≡_
     ≡-IsEquality = eq refl
+  ≡-Equality : Equality {_} {a} {A}
+  ≡-Equality = eqC _≡_
+
 \end{code}
 
 \subsection{Martin-Löf equality}
@@ -274,7 +294,7 @@ The proof of Martin-Löf equality is more difficult, but it is already in Cubica
 \begin{code}
   instance
     ≡p-IsEquality : IsEquality {A = A} _≡p_
-    ≡p-IsEquality = sym-Equality (λ {x y} → λ i → p-c {x = x} {y = y} i)
+    ≡p-IsEquality = sym-Equality p-c
 \end{code}
 
 \subsection{Isomorphism}
@@ -297,8 +317,7 @@ module _ {ℓ} where
   instance
     ≃-IsEquality : IsEquality
       {A = Type ℓ} _≃_
-    ≃-IsEquality = sym-Equality λ {A B} →
-      λ i → univalencePath' {A = A} {B = B} i
+    ≃-IsEquality = sym-Equality univalencePath'
 \end{code}
 
 \subsection{Leibniz Equality}
@@ -407,7 +426,7 @@ module Equalities {a ℓ} {A : Set a} where
 
       module _ {_≣_ : ≣-Type} where
         sym-Equality₂ : (≡-≡-≣ : {x y : A} → let
-          x≡y : Type (ℓ-max a ℓ)
+          x≡y : Type ℓ₁
           x≡y = x ≡₁ y
           x≣y = x ≣ y
           in x≡y ≡ x≣y)
@@ -474,25 +493,22 @@ module Equalities {a ℓ} {A : Set a} where
           α₂ = transport (sym α₁) ≡-≡-≣
           in transport α₁ (sym α₂))
 
-module _ {A : Set} where
-  open Equalities {ℓ-zero} {ℓ-suc ℓ-zero} {A}
+module LeibnizFromPEquality {A : Set} where
+  open Equalities {ℓ-zero} {ℓ-suc ℓ-zero}
 
   _≡p₁_ : A → A → Set₁
   x ≡p₁ y = x ≡p y
 
-  _ = ≡p-IsEquality
   instance
     ≡p₁-isEquality : IsEquality _≡p₁_
     ≡p₁-isEquality = eq λ {x y} → (sym λ i → let
       α : Type₁
-      α = p-c {ℓ-zero} {A} {x = x} {y = y} i
+      α = p-c {ℓ-zero} {x = x} {y = y} i
       in α)
 
-
-
-  leibniz : IsEquality  (_≐_ {A})
+  leibniz : IsEquality _≐_
   leibniz =
-    IsEquality₂.isEquality (eq λ {x y} → FinalEquality.≐≡≡ {_} {x} {y})
+    IsEquality₂.isEquality (eq FinalEquality.≐≡≡)
 
 \end{code}
 
