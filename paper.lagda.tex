@@ -387,9 +387,6 @@ Leibniz to Martin-Löf to cubical equality.
 The equalities used previously were defined using the cubical equality.
 Now I will define them using other equalities.
 
-% \end{code}
-% \begin{code}
-
 \begin{code}
 module Equalities {a ℓ} {A : Set a} where
   private
@@ -427,11 +424,7 @@ the more generic equality \AgdaFunction{≡₁}.
           x≣y = x ≣ y
 
           in _≡_ {ℓ-suc ℓ₁} x≣y x≡y
-\end{code}
 
-The rest of the definition is the same.
-
-\begin{code}
       ≡-≡-≣ : {x y : A} → let
         x≡y : Type ℓ₁
         x≡y = x ≡₁ y
@@ -439,26 +432,50 @@ The rest of the definition is the same.
         in x≡y ≡ x≣y
       ≡-≡-≣ = sym ≣-≡-≡
 
+\end{code}
+
+The rest of the definition is the same.
+
+\begin{code}
       instance
         ≣-isEquality : IsEquality _≣_
         ≣-isEquality = eq (≣-≡-≡ ∙ IsEquality.≣-≡-≡ eq₁)
+\end{code}
 
+From a more generic defintion of equality,
+it is easily possible to return to the less generic definition.
+
+\begin{code}
     module _
       (Eq₂ : Equality {_} {ℓ} {A})
       where
 
       open Equality Eq₂ renaming (_≣_ to _≡₂_; isEquality to eq₂)
+\end{code}
+
+I am defining a new generic equality to prove that it is
+an equality of type 2:
+
+% \end{code}
+%
+% \begin{code}
+
+\begin{code}
+
+      eqsEqual₂ : ∀ {x y} → let
+        x≣₁y : Type ℓ₁
+        x≣₁y = x ≡₁ y
+
+        x≣₂y : Type ℓ₁
+        x≣₂y = x ≡₂ y
+
+        in _≡_ {ℓ-suc ℓ₁} x≣₁y x≣₂y
+      eqsEqual₂ = eqsEqual _≡₁_ _≡₂_
 
       instance
         ≡₂-Equality₂ : IsEquality₂ _≡₂_
-        ≡₂-Equality₂ = eq (eq₂ .≣-≡-≡ ∙ sym (eq₁ .≣-≡-≡))
+        ≡₂-Equality₂ = eq (sym eqsEqual₂)
           where open IsEquality
-
-      alwaysEqual : ∀ {x y} →  x ≡₁ y → x ≡₂ y
-      alwaysEqual {x} {y} p =
-        let joined = sym (≣-≡-≡ {x} {y})
-        in transport joined p
-        where open IsEquality₂ ≡₂-Equality₂
 
       module _ {_≣_ : ≣-Type} where
         sym-Equality₂ : (≡-≡-≣ : {x y : A} → let
@@ -468,6 +485,13 @@ The rest of the definition is the same.
           in x≡y ≡ x≣y)
           → IsEquality₂ _≣_
         sym-Equality₂ ≡-≡-≣ = eq (sym ≡-≡-≣)
+
+\end{code}
+
+Given a symmetric definition of the previous equality,
+it is easy to prove that it is also an equality of type 2.
+
+\begin{code}
 
     module _
       (Eq₃ : Equality {A = Set ℓ₁})
