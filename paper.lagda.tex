@@ -268,7 +268,7 @@ module _ {a ℓ} {A : Set a} where
       x≣₂y = x ≣₂ y
 
       in _≡_ {ℓ-suc ℓ₁} x≣₁y x≣₂y
-  eqsEqual _≣₁_ _≣₂_ ⦃ eq ≣-≡-≡₁ ⦄ ⦃ eq ≣-≡-≡₂ ⦄ = ≣-≡-≡₁ ∙ sym ≣-≡-≡₂
+  eqsEqual _ _ ⦃ eq ≣-≡-≡₁ ⦄ ⦃ eq ≣-≡-≡₂ ⦄ = ≣-≡-≡₁ ∙ sym ≣-≡-≡₂
 \end{code}
 
 It will be defined for each equality, its instance:
@@ -282,7 +282,7 @@ module _ {a} {A : Set a} where
   instance
     ≡-IsEquality : IsEquality {A = A} _≡_
     ≡-IsEquality = eq refl
-  ≡-Equality : Equality {_} {a} {A}
+  ≡-Equality : Equality {ℓ = a}
   ≡-Equality = eqC _≡_
 
 \end{code}
@@ -295,6 +295,8 @@ The proof of Martin-Löf equality is more difficult, but it is already in Cubica
   instance
     ≡p-IsEquality : IsEquality {A = A} _≡p_
     ≡p-IsEquality = sym-Equality p-c
+  ≡p-Equality : Equality {ℓ = a}
+  ≡p-Equality = eqC _≡p_
 \end{code}
 
 \subsection{Isomorphism}
@@ -318,6 +320,8 @@ module _ {ℓ} where
     ≃-IsEquality : IsEquality
       {A = Type ℓ} _≃_
     ≃-IsEquality = sym-Equality univalencePath'
+  ≃-Equality : Equality {ℓ = ℓ}
+  ≃-Equality = eqC _≃_
 \end{code}
 
 \subsection{Leibniz Equality}
@@ -370,6 +374,9 @@ into an equality.
     ≐-IsEquality : IsEquality {A = A} _≐_
     ≐-IsEquality = eq λ {x} {y} → ≐≡≡ ∙
       λ i → ≡p-IsEquality {ℓ-zero} .≣-≡-≡ {x} {y} i
+
+  ≐-Equality : Equality {ℓ = ℓ-suc ℓ-zero}
+  ≐-Equality = eqC _≐_
 \end{code}
 
 The last pass is to join the three equalities between equalities:
@@ -377,13 +384,15 @@ Leibniz to Martin-Löf to cubical equality.
 
 \begin{code}
 module Equalities {a ℓ} {A : Set a} where
-  ≣-Type' = ≣-Type {a} {ℓ} {A}
-  ℓ₁ = ℓ-max a ℓ
+  private
+    ≣-Type' = ≣-Type {a} {ℓ} {A}
+    ℓ₁ = ℓ-max a ℓ
 
   module _
-    (_≡₁_ : ≣-Type')
-    ⦃ eq₁ : IsEquality {a} {ℓ} _≡₁_ ⦄
+    (Eq₁ : Equality {_} {ℓ} {A})
     where
+
+    open Equality Eq₁ renaming (_≣_ to _≡₁_; isEquality to eq₁)
 
     record IsEquality₂ (_≣_ : ≣-Type') : Set (ℓ-suc ℓ₁) where
       constructor eq
@@ -405,13 +414,14 @@ module Equalities {a ℓ} {A : Set a} where
       ≡-≡-≣ = sym ≣-≡-≡
 
       instance
-        isEquality : IsEquality _≣_
-        isEquality = eq (≣-≡-≡ ∙ IsEquality.≣-≡-≡ eq₁)
+        ≣-isEquality : IsEquality _≣_
+        ≣-isEquality = eq (≣-≡-≡ ∙ IsEquality.≣-≡-≡ eq₁)
 
     module _
-      (_≡₂_ : ≣-Type')
-      ⦃ eq₂ : IsEquality _≡₂_ ⦄
+      (Eq₂ : Equality {_} {ℓ} {A})
       where
+
+      open Equality Eq₂ renaming (_≣_ to _≡₂_; isEquality to eq₂)
 
       instance
         ≡₂-Equality₂ : IsEquality₂ _≡₂_
@@ -434,9 +444,10 @@ module Equalities {a ℓ} {A : Set a} where
         sym-Equality₂ ≡-≡-≣ = eq (sym ≡-≡-≣)
 
     module _
-      (_≡₃_ : ≣-Type {ℓ-suc ℓ₁} {a})
-      ⦃ eq₃ : IsEquality _≡₃_ ⦄
+      (Eq₃ : Equality {A = Set ℓ₁})
       where
+
+      open Equality Eq₃ renaming (_≣_ to _≡₃_; isEquality to eq₃)
 
       record IsEquality₃ (_≣_ : ≣-Type') : Set (ℓ-suc ℓ₁) where
         constructor eq
@@ -451,11 +462,11 @@ module Equalities {a ℓ} {A : Set a} where
             in x≣y ≡₃ x≡y
 
         instance
-          isEquality₂ : IsEquality₂ _≣_
-          isEquality₂ = eq (transport (IsEquality.≣-≡-≡ eq₃) ≣-≡-≡)
+          ≣-isEquality₂ : IsEquality₂ _≣_
+          ≣-isEquality₂ = eq (transport (IsEquality.≣-≡-≡ eq₃) ≣-≡-≡)
 
-          isEquality : IsEquality _≣_
-          isEquality = eq (IsEquality₂.≣-≡-≡ isEquality₂ ∙ IsEquality.≣-≡-≡ eq₁)
+          ≣-isEquality : IsEquality _≣_
+          ≣-isEquality = eq (IsEquality₂.≣-≡-≡ ≣-isEquality₂ ∙ IsEquality.≣-≡-≡ eq₁)
 
         ≡-≡-≣ : {x y : A} → let
           x≡y : Type ℓ₁
@@ -465,13 +476,14 @@ module Equalities {a ℓ} {A : Set a} where
         ≡-≡-≣ = let
           α₁ = IsEquality.≡-≡-≣ eq₃
           α₂ = IsEquality.≣-≡-≡ eq₁
-          α₃ = IsEquality.≡-≡-≣ isEquality
+          α₃ = IsEquality.≡-≡-≣ ≣-isEquality
           in transport α₁ (α₂ ∙ α₃)
 
       module _
-        (_≡₂_ : ≣-Type')
-        ⦃ eq₂ : IsEquality _≡₂_ ⦄
+        (Eq₂ : Equality {_} {ℓ} {A})
         where
+
+        open Equality Eq₂ renaming (_≣_ to _≡₂_; isEquality to eq₂)
 
         instance
           ≡₂-Equality₃ : IsEquality₃ _≡₂_
@@ -479,7 +491,7 @@ module Equalities {a ℓ} {A : Set a} where
             where
               open IsEquality eq₃
               α : ∀ {x y} → (x ≡₂ y) ≡₃ (x ≡₁ y)
-              α = transport ≡-≡-≣ (IsEquality₂.≣-≡-≡ (≡₂-Equality₂ _≡₂_))
+              α = transport ≡-≡-≣ (IsEquality₂.≣-≡-≡ (≡₂-Equality₂ (eqC _≡₂_)))
 
       module _ {_≣_ : ≣-Type'} where
         sym-Equality₃ : (≡-≡-≣ : {x y : A} → let
@@ -506,9 +518,9 @@ module LeibnizFromPEquality {A : Set} where
       α = p-c {ℓ-zero} {x = x} {y = y} i
       in α)
 
-  leibniz : IsEquality _≐_
+  leibniz : IsEquality {A = A} _≐_
   leibniz =
-    IsEquality₂.isEquality (eq FinalEquality.≐≡≡)
+    IsEquality₂.≣-isEquality {Eq₁ = eqC _≡p_} (eq FinalEquality.≐≡≡)
 
 \end{code}
 
