@@ -24,7 +24,7 @@ ext p = ctop (funExt (ptoc ∘ p))
 module Leibniz {A : Set} where
 
   _≐_ : (a b : A) → Set₁
-  _≐_ a b = (P : A → Set) → P a → P b
+  a ≐ b = (P : A → Set) → P a → P b
 
   reflexive≐ : {a : A} → a ≐ a
   reflexive≐ P Pa = Pa
