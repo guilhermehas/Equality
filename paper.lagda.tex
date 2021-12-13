@@ -462,10 +462,6 @@ it is easily possible to return to the less generic definition.
 I am defining a new generic equality to prove that it is
 an equality of type 2:
 
-% \end{code}
-%
-% \begin{code}
-
 \begin{code}
       eqsEqual₂ : let
         x≣₁y : Type ℓ₁
@@ -496,6 +492,10 @@ an equality of type 2:
 Given a symmetric definition of the previous equality,
 it is easy to prove that it is also an equality of type 2.
 
+\subsection{Everything is an equality}
+
+In this part, a relation is an equality when it is equal (using a general equality) to a cubical equality.
+
 \begin{code}
 
     module _
@@ -507,15 +507,13 @@ it is easy to prove that it is also an equality of type 2.
       record IsEquality₃ (_≣_ : ≣-Type') : Set (ℓ-suc ℓ₁) where
         constructor eq
         field
-          ≣-≡-≡ : let
-            x≡y : Type ℓ₁
-            x≡y = x ≡₁ y
+          ≣-≡-≡ : (x ≣ y) ≡₃ (x ≡₁ y)
+\end{code}
 
-            x≣y : Type ℓ₁
-            x≣y = x ≣ y
+With this definition of equality, it is possible to prove that if an equality is equal to a cubical equality,
+so it is equal (using the general or cubical equality) to the cubical equality.
 
-            in x≣y ≡₃ x≡y
-
+\begin{code}
         instance
           ≣-isEquality₂ : IsEquality₂ _≣_
           ≣-isEquality₂ = eq (transport (IsEquality.≣-≡-≡ eq₃) ≣-≡-≡)
@@ -523,17 +521,22 @@ it is easy to prove that it is also an equality of type 2.
           ≣-isEquality : IsEquality _≣_
           ≣-isEquality = eq (IsEquality₂.≣-≡-≡ ≣-isEquality₂ ∙ IsEquality.≣-≡-≡ eq₁)
 
-        ≡-≡-≣ : let
-          x≡y : Type ℓ₁
-          x≡y = x ≡₁ y
-          x≣y = x ≣ y
-          in x≡y ≡₃ x≣y
+\end{code}
+
+This is the proof that the symmetric definition of equality is also valid.
+
+\begin{code}
+        ≡-≡-≣ : (x ≡₁ y) ≡₃ (x ≣ y)
         ≡-≡-≣ = let
           α₁ = IsEquality.≡-≡-≣ eq₃
           α₂ = IsEquality.≣-≡-≡ eq₁
           α₃ = IsEquality.≡-≡-≣ ≣-isEquality
           in transport α₁ (α₂ ∙ α₃)
+\end{code}
 
+It is possible to proof that a general equality is an equality from this definition:
+
+\begin{code}
       module _
         (Eq₂ : Equality {_} {ℓ} {A})
         where
@@ -548,35 +551,53 @@ it is easy to prove that it is also an equality of type 2.
               α : (x ≡₂ y) ≡₃ (x ≡₁ y)
               α = transport ≡-≡-≣ (IsEquality₂.≣-≡-≡ (≡₂-Equality₂ (eqC _≡₂_)))
 
+\end{code}
+
+If there is a proof of the symmetrical equality, so it is also an equality from this definition:
+
+\begin{code}
+
       module _ {_≣_ : ≣-Type'} where
-        sym-Equality₃ : (≡-≡-≣ : {x y : A} → let
-          x≡y : Type (ℓ-max a ℓ)
-          x≡y = x ≡₁ y
-          x≣y = x ≣ y
-          in x≡y ≡₃ x≣y)
+        sym-Equality₃ :
+          (≡-≡-≣ : ∀ {x y} → (x ≡₁ y) ≡₃ (x ≣ y))
           → IsEquality₃ _≣_
         sym-Equality₃ ≡-≡-≣ = eq (let
           α₁ = IsEquality.≡-≡-≣ eq₃
           α₂ = transport (sym α₁) ≡-≡-≣
           in transport α₁ (sym α₂))
 
+\end{code}
+
+\section{Using the definitions}
+
+The best part of defining all of these stuffs is that it is now easy to proof that Leibniz equality is an equality.
+
+\begin{code}
 module LeibnizFromPEquality {A : Set} where
   open Equalities {ℓ-zero} {ℓ-suc ℓ-zero}
 
   _≡p₁_ : A → A → Set₁
   x ≡p₁ y = x ≡p y
+\end{code}
 
+I redefined this equality because it must be a set of universe one.
+And because of that, I have to prove again that this is an equality:
+
+\begin{code}
   instance
     ≡p₁-isEquality : IsEquality _≡p₁_
     ≡p₁-isEquality = eq λ {x y} → (sym λ i → let
       α : Type₁
       α = p-c {ℓ-zero} {x = x} {y = y} i
       in α)
+\end{code}
 
+With just one line of code, it is possible now to prove that Leibniz equality is an equality
+from Martin-Löf Equality.
+
+\begin{code}
   leibniz : IsEquality {A = A} _≐_
-  leibniz =
-    IsEquality₂.≣-isEquality {Eq₁ = eqC _≡p_} (eq FinalEquality.≐≡≡)
-
+  leibniz = IsEquality₂.≣-isEquality {Eq₁ = eqC _≡p_} (eq FinalEquality.≐≡≡)
 \end{code}
 
 \section*{Acknowledgements}
