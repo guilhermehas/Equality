@@ -220,10 +220,13 @@ module _ {a ℓ} {A : Set a} where
   private
     ℓ₁ = ℓ-max a ℓ
 
+  private variable
+    x y z : A
+
   record IsEquality (_≣_ : ≣-Type) : Set (ℓ-suc (ℓ-max a ℓ)) where
     constructor eq
     field
-      ≣-≡-≡ : ∀ {x y} → let
+      ≣-≡-≡ : let
         x≡y : Type ℓ₁
         x≡y = x ≡ y
 
@@ -232,7 +235,7 @@ module _ {a ℓ} {A : Set a} where
 
         in _≡_ {ℓ-suc ℓ₁} x≣y x≡y
 
-    ≡-≡-≣ : {x y : A} → let
+    ≡-≡-≣ : let
       x≡y : Type (ℓ-max a ℓ)
       x≡y = x ≡ y
       x≣y = x ≣ y
@@ -392,6 +395,9 @@ module Equalities {a ℓ} {A : Set a} where
   private
     ≣-Type' = ≣-Type {a} {ℓ} {A}
     ℓ₁ = ℓ-max a ℓ
+
+  private variable
+    x y z : A
 \end{code}
 
 Loaded the modules using the levels to be more generic.
@@ -410,7 +416,7 @@ I am importing a generic equality to use it to define a more generic equality.
     record IsEquality₂ (_≣_ : ≣-Type') : Set (ℓ-suc ℓ₁) where
       constructor eq
       field
-        ≣-≡-≡ : ∀ {x y} → let
+        ≣-≡-≡ : let
           x≡y : Type ℓ₁
           x≡y = x ≡₁ y
 \end{code}
@@ -425,7 +431,7 @@ the more generic equality \AgdaFunction{≡₁}.
 
           in _≡_ {ℓ-suc ℓ₁} x≣y x≡y
 
-      ≡-≡-≣ : {x y : A} → let
+      ≡-≡-≣ : let
         x≡y : Type ℓ₁
         x≡y = x ≡₁ y
         x≣y = x ≣ y
@@ -461,7 +467,7 @@ an equality of type 2:
 % \begin{code}
 
 \begin{code}
-      eqsEqual₂ : ∀ {x y} → let
+      eqsEqual₂ : let
         x≣₁y : Type ℓ₁
         x≣₁y = x ≡₁ y
 
@@ -501,7 +507,7 @@ it is easy to prove that it is also an equality of type 2.
       record IsEquality₃ (_≣_ : ≣-Type') : Set (ℓ-suc ℓ₁) where
         constructor eq
         field
-          ≣-≡-≡ : ∀ {x y} → let
+          ≣-≡-≡ : let
             x≡y : Type ℓ₁
             x≡y = x ≡₁ y
 
@@ -517,7 +523,7 @@ it is easy to prove that it is also an equality of type 2.
           ≣-isEquality : IsEquality _≣_
           ≣-isEquality = eq (IsEquality₂.≣-≡-≡ ≣-isEquality₂ ∙ IsEquality.≣-≡-≡ eq₁)
 
-        ≡-≡-≣ : {x y : A} → let
+        ≡-≡-≣ : let
           x≡y : Type ℓ₁
           x≡y = x ≡₁ y
           x≣y = x ≣ y
@@ -539,7 +545,7 @@ it is easy to prove that it is also an equality of type 2.
           ≡₂-Equality₃ = eq α
             where
               open IsEquality eq₃
-              α : ∀ {x y} → (x ≡₂ y) ≡₃ (x ≡₁ y)
+              α : (x ≡₂ y) ≡₃ (x ≡₁ y)
               α = transport ≡-≡-≣ (IsEquality₂.≣-≡-≡ (≡₂-Equality₂ (eqC _≡₂_)))
 
       module _ {_≣_ : ≣-Type'} where
