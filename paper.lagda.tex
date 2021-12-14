@@ -109,7 +109,7 @@ module paper where
 \end{code}
 
 The cubical flag is necessary because we are using cubical equality,
-and the cumulativiy flag is also necessary for level subtyping,
+and the cumulative flag is also necessary for level subtyping,
 
 \begin{code}
 open import Agda.Primitive.Cubical using (I; i0; i1)
@@ -119,7 +119,7 @@ This library loads Cubical Agda Primitives as the equality interval.
 
 \subsection{Martin-Löf Equality}
 
-At the begin of Agda and in most theorems proves, equality is given by Martin-Löf's definition:
+At the beginning of Agda and in most theorems proves, equality is given by Martin-Löf's definition:
 
 \begin{code}
 module Martin-Löf {ℓ} {A : Set ℓ} where
@@ -278,7 +278,7 @@ It will be defined for each equality, its instance:
 
 \subsection{Cubical Equality}
 
-The simplest example is the cubical equality hence this equality is already equal to itself.
+The simplest example is cubical equality hence this equality is already equal in itself.
 
 \begin{code}
 module _ {a} {A : Set a} where
@@ -292,7 +292,7 @@ module _ {a} {A : Set a} where
 
 \subsection{Martin-Löf equality}
 
-The proof of Martin-Löf equality is more difficult, but it is already in Cubical library as \AgdaFunction{p-c}.
+The proof of Martin-Löf equality is more difficult, but it is already in the Cubical library as \AgdaFunction{p-c}.
 
 \begin{code}
   instance
@@ -304,7 +304,7 @@ The proof of Martin-Löf equality is more difficult, but it is already in Cubica
 
 \subsection{Isomorphism}
 
-The isomorphism is an equality between types.
+Isomorphism is equality between types.
 
 \begin{code}
 module _ {ℓ} where
@@ -316,7 +316,7 @@ module _ {ℓ} where
 \end{code}
 
 \AgdaFunction{univalencePath} is already defined in Agda library, but with \AgdaBound{A ≃ B} instead of
-\AgdaBound{Lifted (A ≃ B)}. This change can be done because of the cumulativity flag.
+\AgdaBound{Lifted (A ≃ B)}. This change can be done because of the cumulative flag.
 
 \begin{code}
   instance
@@ -329,7 +329,7 @@ module _ {ℓ} where
 
 \subsection{Leibniz Equality}
 
-The hardest equality to proof that is equalty is the Leibniz Equality.
+The hardest equality to prove that is equality is the Leibniz Equality.
 
 \begin{code}
 liftIso : ∀ {a b} {A : Type a} {B : Type b}
@@ -348,7 +348,7 @@ open Leibniz
 \end{code}
 
 It is importing the definition of Leibniz equality made by \cite{abel2020leibniz}.
-In this work, there is already a proof of the isomorphism between the Leibniz and the Martin-Löf equality.
+In this work, there is already proof of the isomorphism between Leibniz and Martin-Löf equality.
 
 \begin{code}
 module FinalEquality {A : Set} where
@@ -359,16 +359,16 @@ module FinalEquality {A : Set} where
 \end{code}
 
 In Cubical Library, the definition of isomorphism uses cubical equality instead of Martin-Löf equality
-when we have to proof that \AgdaBound{∀ x → from (to x) ≡ x} and \AgdaBound{∀ x → to (from x) ≡ x}.
-\AgdaFunction{ptoc} is necessary to do this convertion from these equalities.
+when we have to prove that \AgdaBound{∀ x → from (to x) ≡ x} and \AgdaBound{∀ x → to (from x) ≡ x}.
+\AgdaFunction{ptoc} is necessary to do this conversion from these equalities.
 
 \begin{code}
   ≐≡≡ : ∀ {a b} → (a ≐ b) ≡c (a ≡p b)
   ≐≡≡ = let lifted = liftIso ≐≅≡  in isoToPath lifted
 \end{code}
 
-Using the univalence and \AgdaFunction{liftIso} defined previously, it is possible to transform the isormorphism
-into an equality.
+Using the univalence and \AgdaFunction{liftIso} defined previously, it is possible to transform the isomorphism
+into equality.
 
 \begin{code}
   open IsEquality
@@ -387,7 +387,7 @@ Leibniz to Martin-Löf to cubical equality.
 
 \section{New Equalities types}
 
-The equalities used previously were defined using the cubical equality.
+The equalities used previously were defined using cubical equality.
 Now I will define them using other equalities.
 
 \begin{code}
@@ -410,7 +410,7 @@ Loaded the modules using the levels to be more generic.
     open Equality Eq₁ renaming (_≣_ to _≡₁_; isEquality to eq₁)
 \end{code}
 
-I am importing a generic equality to use it to define a more generic equality.
+I am importing generic equality to use it to define more generic equality.
 
 \begin{code}
     record IsEquality₂ (_≣_ : ≣-Type') : Set (ℓ-suc ℓ₁) where
@@ -448,7 +448,7 @@ The rest of the definition is the same.
         ≣-isEquality = eq (≣-≡-≡ ∙ IsEquality.≣-≡-≡ eq₁)
 \end{code}
 
-From a more generic defintion of equality,
+From a more generic definition of equality,
 it is easily possible to return to the less generic definition.
 
 \begin{code}
@@ -490,11 +490,11 @@ an equality of type 2:
 \end{code}
 
 Given a symmetric definition of the previous equality,
-it is easy to prove that it is also an equality of type 2.
+it is easy to prove that it is also equality of type 2.
 
 \subsection{Everything is an equality}
 
-In this part, a relation is an equality when it is equal (using a general equality) to a cubical equality.
+In this part, a relation is equality when it is equal (using general equality) to cubical equality.
 
 \begin{code}
 
@@ -510,7 +510,7 @@ In this part, a relation is an equality when it is equal (using a general equali
           ≣-≡-≡ : (x ≣ y) ≡₃ (x ≡₁ y)
 \end{code}
 
-With this definition of equality, it is possible to prove that if an equality is equal to a cubical equality,
+With this definition of equality, it is possible to prove that if equality is equal to cubical equality,
 so it is equal (using the general or cubical equality) to the cubical equality.
 
 \begin{code}
@@ -523,7 +523,7 @@ so it is equal (using the general or cubical equality) to the cubical equality.
 
 \end{code}
 
-This is the proof that the symmetric definition of equality is also valid.
+This is proof that the symmetric definition of equality is also valid.
 
 \begin{code}
         ≡-≡-≣ : (x ≡₁ y) ≡₃ (x ≣ y)
@@ -534,7 +534,7 @@ This is the proof that the symmetric definition of equality is also valid.
           in transport α₁ (α₂ ∙ α₃)
 \end{code}
 
-It is possible to proof that a general equality is an equality from this definition:
+It is possible to prove that a general equality is equality from this definition:
 
 \begin{code}
       module _
@@ -553,7 +553,7 @@ It is possible to proof that a general equality is an equality from this definit
 
 \end{code}
 
-If there is a proof of the symmetrical equality, so it is also an equality from this definition:
+If there is proof of symmetrical equality, so it is also equality from this definition:
 
 \begin{code}
 
@@ -570,7 +570,7 @@ If there is a proof of the symmetrical equality, so it is also an equality from 
 
 \section{Using the definitions}
 
-The best part of defining all of these stuffs is that it is now easy to proof that Leibniz equality is an equality.
+The best part of defining all of this stuff is that it is now easy to prove that Leibniz equality is equality.
 
 \begin{code}
 module LeibnizFromPEquality {A : Set} where
