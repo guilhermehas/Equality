@@ -115,6 +115,16 @@ and the cumulative flag is also necessary for level subtyping,
 open import Agda.Primitive.Cubical using (I; i0; i1)
 \end{code}
 
+Private variables are required, so it is not necessary to redefine them later as an implicit variable.
+
+\begin{code}
+open import Cubical.Core.Primitives using (Level; ℓ-max)
+
+private variable
+  ℓ ℓ′ : Level
+  A : Set ℓ
+\end{code}
+
 This library loads Cubical Agda Primitives as the equality interval.
 
 \subsection{Martin-Löf Equality}
@@ -122,8 +132,7 @@ This library loads Cubical Agda Primitives as the equality interval.
 At the beginning of Agda and in most theorems proves, equality is given by Martin-Löf's definition:
 
 \begin{code}
-module Martin-Löf {ℓ} {A : Set ℓ} where
-
+module Martin-Löf {A : Set ℓ} where
   data _≡_ (x : A) : A → Set ℓ where
     refl : x ≡ x
 \end{code}
@@ -144,7 +153,7 @@ This equality is very convenient in proof assistances like Agda because it is po
 But the problem of this equality is that it does not handle extensionality and other axioms very well.
 
 \begin{code}
-module FunExt {ℓ ℓ'} {A : Set ℓ} {B : Set ℓ'} where
+module FunExt {A : Set ℓ} {B : Set ℓ′} where
   open Martin-Löf
 
   funExt-Type = {f g : A → B}
@@ -156,7 +165,7 @@ module FunExt {ℓ ℓ'} {A : Set ℓ} {B : Set ℓ'} where
 To solve this problem, Agda adopted cubical type theory that equality is a function from the path to type:
 
 \begin{code}
-module CubicalEquality {ℓ} {A : Set ℓ} where
+module CubicalEquality {A : Set ℓ} where
   postulate
     PathP : (A : I → Set ℓ) → A i0 → A i1 → Set ℓ
 
@@ -167,7 +176,7 @@ module CubicalEquality {ℓ} {A : Set ℓ} where
 From this equality, I will define reflection, symmetry and extensionality:
 
 \begin{code}
-module CubicalResults {ℓ ℓ'} {A : Set ℓ} {B : Set ℓ'} where
+module CubicalResults {A : Set ℓ} {B : Set ℓ′} where
   open import Cubical.Core.Primitives
 
   private variable
@@ -215,15 +224,15 @@ open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Function
 open import Cubical.Data.Equality
 
-module _ {a ℓ} {A : Set a} where
+module _ {ℓ} {A : Set ℓ′} where
   ≣-Type = A → A → Set ℓ
   private
-    ℓ₁ = ℓ-max a ℓ
+    ℓ₁ = ℓ-max ℓ′ ℓ
 
   private variable
     x y z : A
 
-  record IsEquality (_≣_ : ≣-Type) : Set (ℓ-suc (ℓ-max a ℓ)) where
+  record IsEquality (_≣_ : ≣-Type) : Set (ℓ-suc ℓ₁) where
     constructor eq
     field
       ≣-≡-≡ : let
@@ -236,7 +245,7 @@ module _ {a ℓ} {A : Set a} where
         in _≡_ {ℓ-suc ℓ₁} x≣y x≡y
 
     ≡-≡-≣ : let
-      x≡y : Type (ℓ-max a ℓ)
+      x≡y : Type ℓ₁
       x≡y = x ≡ y
       x≣y = x ≣ y
       in x≡y ≡ x≣y
@@ -244,14 +253,14 @@ module _ {a ℓ} {A : Set a} where
 
   module _ {_≣_ : ≣-Type} where
     sym-Equality : (≡-≡-≣ : {x y : A} → let
-      x≡y : Type (ℓ-max a ℓ)
+      x≡y : Type ℓ₁
       x≡y = x ≡ y
       x≣y = x ≣ y
       in x≡y ≡ x≣y)
       → IsEquality _≣_
     sym-Equality ≡-≡-≣ = eq (sym ≡-≡-≣)
 
-  record Equality : Set (ℓ-suc (ℓ-max a ℓ)) where
+  record Equality : Set (ℓ-suc ℓ₁) where
     constructor eqC
     field
       _≣_ : ≣-Type
@@ -332,9 +341,9 @@ module _ {ℓ} where
 The hardest equality to prove that is equality is the Leibniz Equality.
 
 \begin{code}
-liftIso : ∀ {a b} {A : Type a} {B : Type b}
-  → Iso {a} {b} A B → Iso {ℓ-max a b} {ℓ-max a b} A B
-liftIso {a} f = iso fun inv
+liftIso : {A : Type ℓ} {B : Type ℓ′}
+  → Iso {ℓ} {ℓ′} A B → Iso {ℓ-max ℓ ℓ′} {ℓ-max ℓ ℓ′} A B
+liftIso f = iso fun inv
   (λ x i → rightInv x i) (λ x i → leftInv x i)
 \end{code}
 
@@ -353,8 +362,10 @@ In this work, there is already proof of the isomorphism between Leibniz and Mart
 \begin{code}
 module FinalEquality {A : Set} where
   open MainResult A
+  private variable
+    x y z : A
 
-  ≐≅≡ : ∀ {a b} → Iso (a ≐ b) (a ≡p b)
+  ≐≅≡ : Iso (x ≐ y) (x ≡p y)
   ≐≅≡ = iso j i (ptoc ∘ ji) (ptoc ∘ ij)
 \end{code}
 
@@ -363,7 +374,7 @@ when we have to prove that \AgdaBound{∀ x → from (to x) ≡ x} and \AgdaBoun
 \AgdaFunction{ptoc} is necessary to do this conversion from these equalities.
 
 \begin{code}
-  ≐≡≡ : ∀ {a b} → (a ≐ b) ≡c (a ≡p b)
+  ≐≡≡ : (x ≐ y) ≡c (x ≡p y)
   ≐≡≡ = let lifted = liftIso ≐≅≡  in isoToPath lifted
 \end{code}
 
@@ -467,10 +478,7 @@ an equality of type 2:
         x≣₁y : Type ℓ₁
         x≣₁y = x ≡₁ y
 
-        x≣₂y : Type ℓ₁
-        x≣₂y = x ≡₂ y
-
-        in _≡_ {ℓ-suc ℓ₁} x≣₁y x≣₂y
+        in x≣₁y ≡ (x ≡₂ y)
       eqsEqual₂ = eqsEqual _≡₁_ _≡₂_
 
       instance
@@ -482,8 +490,7 @@ an equality of type 2:
         sym-Equality₂ : (≡-≡-≣ : {x y : A} → let
           x≡y : Type ℓ₁
           x≡y = x ≡₁ y
-          x≣y = x ≣ y
-          in x≡y ≡ x≣y)
+          in x≡y ≡ (x ≣ y))
           → IsEquality₂ _≣_
         sym-Equality₂ ≡-≡-≣ = eq (sym ≡-≡-≣)
 
