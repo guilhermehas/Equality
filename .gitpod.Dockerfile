@@ -30,11 +30,20 @@ RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
 RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
   && nix profile install nixpkgs#git nixpkgs#git-lfs
 
-# Install Agda
-RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
-  && nix profile install nixpkgs/release-21.11#agda
-
 # Install direnv
 RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
   && nix profile install nixpkgs#direnv \
   && direnv hook bash >> /home/gitpod/.bashrc
+
+# Install Agda
+RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
+  && nix profile install nixpkgs/release-21.11#haskellPackages.Agda
+
+RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
+  && nix profile install nixpkgs/release-21.11#agda-pkg
+
+RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
+  && apkg init
+
+RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
+  && yes | apkg install cubical
