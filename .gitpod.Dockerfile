@@ -21,24 +21,20 @@ RUN touch .bash_profile \
 RUN echo '. /home/gitpod/.nix-profile/etc/profile.d/nix.sh' >> /home/gitpod/.bashrc
 RUN mkdir -p /home/gitpod/.config/nixpkgs && echo '{ allowUnfree = true; }' >> /home/gitpod/.config/nixpkgs/config.nix
 
-# Install git
-RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
-  && nix-channel --update
-
 # Install cachix
 RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
-  && nix-env -iA cachix -f https://cachix.org/api/v1/install \
+  && nix profile install nixpkgs#cachix \
   && cachix use cachix
 
 # Install git
 RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
-  && nix-env -i git git-lfs
+  && nix profile install nixpkgs#git nixpkgs#git-lfs
 
 # Install Agda
 RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
-  && nix profile install agda
+  && nix profile install nixpkgs/release-21.11#agda
 
 # Install direnv
 RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
-  && nix-env -i direnv \
+  && nix profile install nixpkgs#direnv \
   && direnv hook bash >> /home/gitpod/.bashrc
