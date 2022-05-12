@@ -21,29 +21,24 @@ RUN touch .bash_profile \
 RUN echo '. /home/gitpod/.nix-profile/etc/profile.d/nix.sh' >> /home/gitpod/.bashrc
 RUN mkdir -p /home/gitpod/.config/nixpkgs && echo '{ allowUnfree = true; }' >> /home/gitpod/.config/nixpkgs/config.nix
 
+ENV PATH="${HOME}/.nix-profile/bin:${PATH}"
+
 # Install cachix
-RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
-  && nix profile install nixpkgs#cachix \
+RUN nix profile install nixpkgs#cachix \
   && cachix use cachix
 
 # Install git
-RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
-  && nix profile install nixpkgs#git nixpkgs#git-lfs
+RUN nix profile install nixpkgs#git nixpkgs#git-lfs
 
 # Install direnv
-RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
-  && nix profile install nixpkgs#direnv \
+RUN nix profile install nixpkgs#direnv \
   && direnv hook bash >> /home/gitpod/.bashrc
 
 # Install Agda
-RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
-  && nix profile install nixpkgs/release-21.11#haskellPackages.Agda
+RUN nix profile install nixpkgs/release-21.11#haskellPackages.Agda
 
-RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
-  && nix profile install nixpkgs/release-21.11#agda-pkg
+RUN nix profile install nixpkgs/release-21.11#agda-pkg
 
-RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
-  && apkg init
+RUN apkg init
 
-RUN . /home/gitpod/.nix-profile/etc/profile.d/nix.sh \
-  && yes | apkg install cubical
+RUN yes | apkg install cubical
